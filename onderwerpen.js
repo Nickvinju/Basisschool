@@ -58,7 +58,7 @@ const ONDERWERPEN = [
   {
     titel: 'Woorden blok 2',
     vak: 'Taal',
-    uitleg: 'Woordenschat les 1 t/m 9: flitskaarten, koppelen, typen, woordclusters, een oefentoets en Woord-invaders.',
+    uitleg: 'Woordenschat les 1 t/m 9: flitskaarten, koppelen, woordclusters, een oefentoets en Woord-invaders.',
     emoji: '🔤',
     kleur: '#e8590c',
     link: 'woorden-blok-2/index.html',

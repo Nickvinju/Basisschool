@@ -78,9 +78,6 @@ function keuzesVoor(w, n = 4, pool = selectie()) {
   return shuffle([w, ...[...zelfde, ...rest].slice(0, n - 1)]);
 }
 
-const normaal = s => s.toLowerCase().replace(/[.!?,-]/g, '').replace(/\s+/g, ' ').trim();
-const zonderLidwoord = s => s.replace(/^(de|het|een) /, '');
-
 const sterren = (n, max = 3) => '★'.repeat(n) + '☆'.repeat(max - n);
 const sterrenVoorFouten = (fouten, grens) => fouten <= grens[0] ? 3 : fouten <= grens[1] ? 2 : 1;
 
@@ -108,7 +105,6 @@ const LEREN = [
   { id: 'lijst', emoji: '📋', naam: 'Woordenlijst', uitleg: 'Bekijk alle woorden, betekenissen, zinnen en clusters.', start: startLijst },
   { id: 'flits', emoji: '🃏', naam: 'Flitskaarten', uitleg: 'Weet jij wat het woord betekent? Draai de kaart om.', start: startFlits },
   { id: 'koppel', emoji: '🔗', naam: 'Koppelen', uitleg: 'Zoek bij elk woord de goede betekenis.', start: startKoppel },
-  { id: 'typen', emoji: '✏️', naam: 'Woord typen', uitleg: 'Lees de betekenis en typ het woord goed.', start: startTypen },
   { id: 'clusters', emoji: '🧺', naam: 'Woordclusters', uitleg: 'Sorteer de woorden bij het goede cluster.', start: startClusters }
 ];
 
@@ -277,75 +273,7 @@ function startKoppel() {
   speelRonde();
 }
 
-/* ================= 4. WOORD TYPEN ================= */
-function startTypen() {
-  const rij = shuffle(selectie()).slice(0, 8);
-  let i = 0, punten = 0;
-  const lijst = [];
-
-  function vraag() {
-    if (i >= rij.length) {
-      const st = punten >= rij.length - .5 ? 3 : punten >= rij.length * .6 ? 2 : 1;
-      bewaarSterren('typen', st);
-      return toonUitslag({
-        emoji: '✏️', titel: 'Klaar met typen!', ster: st,
-        tekst: `Je had er <b>${String(punten).replace('.', ',')}</b> van de ${rij.length} punten.`,
-        nakijken: `<ol class="review">${lijst.join('')}</ol>`, opnieuw: startTypen
-      });
-    }
-    const w = rij[i];
-    let pogingen = 0, hints = 0;
-    oefening('✏️ Woord typen', `${i + 1} van ${rij.length}`, Math.round(i / rij.length * 100));
-    $('#oefBody').innerHTML = `
-      <div class="panel">
-        <div class="clue"><span class="soort">${esc(w.soort)}</span>${esc(w.betekenis)}</div>
-        <p class="zin">${zinHTML(w, 'gat')}</p>
-        <form class="type-row" id="typForm" autocomplete="off">
-          <input id="typIn" placeholder="Typ hier het woord…" autocapitalize="off" spellcheck="false" aria-label="Typ het woord">
-          <button class="btn" type="submit">Check ✔</button>
-        </form>
-        <div class="hint-letters" id="hintRegel"></div>
-        <div id="typFb" class="feedback hidden"></div>
-        <div class="actions">
-          <button class="btn ghost small" id="hintBtn" type="button">💡 Hint</button>
-          <button class="btn hidden" id="typVolgende" type="button">Volgende ▶</button>
-        </div>
-      </div>`;
-    const inp = $('#typIn'); inp.focus();
-    const doel = zonderLidwoord(w.woord).replace(/-$/, '');
-    $('#hintBtn').onclick = () => {
-      hints = Math.min(hints + 1, doel.length - 1);
-      $('#hintRegel').textContent = [...doel].map((c, k) => c === ' ' ? ' ' : k < hints ? c : '_').join('');
-      inp.focus();
-    };
-    const klaar = (goed) => {
-      const p = goed ? (pogingen === 1 && !hints ? 1 : .5) : 0;
-      punten += p;
-      lijst.push(`<li><span class="${goed ? 'ok' : 'nok'}">${goed ? '✔' : '✘'}</span> <b>${esc(w.woord)}</b>: ${esc(w.betekenis)}</li>`);
-      $('#typFb').className = 'feedback ' + (goed ? 'good' : 'bad');
-      $('#typFb').innerHTML = goed ? `✅ Goed zo! <b>${esc(w.woord)}</b>` : `Het goede woord is: <b>${esc(w.woord)}</b>`;
-      inp.disabled = true; $('#hintBtn').classList.add('hidden');
-      $('#typVolgende').classList.remove('hidden'); $('#typVolgende').focus();
-      goed ? sndGood() : sndBad();
-    };
-    $('#typForm').onsubmit = e => {
-      e.preventDefault();
-      if (inp.disabled || !inp.value.trim()) return;
-      pogingen++;
-      const in_ = normaal(inp.value);
-      if (in_ === normaal(w.woord) || in_ === normaal(doel)) return klaar(true);
-      if (pogingen >= 2) return klaar(false);
-      sndBad();
-      $('#typFb').className = 'feedback bad';
-      $('#typFb').textContent = 'Nog niet goed. Kijk goed naar de spelling en probeer het nog een keer!';
-      inp.select();
-    };
-    $('#typVolgende').onclick = () => { i++; vraag(); };
-  }
-  vraag();
-}
-
-/* ================= 5. WOORDCLUSTERS SORTEREN ================= */
+/* ================= 4. WOORDCLUSTERS SORTEREN ================= */
 function startClusters() {
   const weken = [...new Set(clusterSel().map(c => c.week))];
   let r = 0, fouten = 0;

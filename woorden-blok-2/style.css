@@ -159,15 +159,6 @@ h2 { font-size: 1.6rem; margin: 26px 0 10px; }
 @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 @media (max-width: 560px) { .match { grid-template-columns: 1fr 1.3fr; } .match .opt { font-size: .9rem; padding: 10px; } }
 
-/* ---------- typen ---------- */
-.type-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.type-row input {
-  flex: 1 1 220px; min-width: 0; font: inherit; font-size: 1.3rem; font-weight: 800; padding: 12px 14px;
-  border-radius: 14px; border: 3px solid var(--line); background: var(--card); color: var(--text);
-}
-.type-row input:focus { outline: none; border-color: var(--teal); }
-.hint-letters { font-family: monospace; font-size: 1.4rem; letter-spacing: 4px; margin: 10px 0 0; color: var(--teal); }
-
 /* ---------- clusters sorteren ---------- */
 .sort-cards { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 50px; }
 .sort-card { font: inherit; font-weight: 800; cursor: pointer; border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 14px; color: var(--text); }
