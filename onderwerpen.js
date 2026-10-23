@@ -54,6 +54,29 @@ const ONDERWERPEN = [
         procent: Math.round((sterren / max) * 100)
       };
     }
+  },
+  {
+    titel: 'Woorden blok 2',
+    vak: 'Taal',
+    uitleg: 'Woordenschat les 1 t/m 9: flitskaarten, koppelen, typen, woordclusters, een oefentoets en Woord-invaders.',
+    emoji: '🔤',
+    kleur: '#e8590c',
+    link: 'woorden-blok-2/index.html',
+    voortgang() {
+      const d = leesOpslag('woordenBlok2_v1');
+      if (!d) return null;
+      const totaal = 55; // aantal woorden in woorden-blok-2/woorden.js
+      const bekend = Object.values(d.bekend || {}).filter(Boolean).length;
+      const beste = (d.toetsen || []).reduce((m, t) => Math.max(m, t.cijfer), 0);
+      return {
+        regels: [
+          `🃏 ${bekend} / ${totaal} woorden gekend`,
+          beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')}` : '🏆 Nog geen oefentoets gemaakt',
+          `👾 Highscore Woord-invaders: ${(d.inv && d.inv.best) || 0}`
+        ],
+        procent: Math.round((bekend / totaal) * 100)
+      };
+    }
   }
 
   // Voorbeeld voor later (haal de // weg en vul in):
