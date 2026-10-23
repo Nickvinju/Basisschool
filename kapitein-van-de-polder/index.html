@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e7cc2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Kapitein van de Polder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sea-bg" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <a class="home-link" href="../index.html">← Oliver Oefeneiland</a>
+        <h1>⚓ Kapitein van de Polder</h1>
+        <p class="sub">Oefentoets Meander thema 6 · Pas op voor de zee · Nieuw land · Flevoland &amp; Zeeland</p>
+      </div>
+      <button class="icon-btn" id="soundBtn" title="Geluid aan/uit">🔊</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ===== START ===== -->
+    <section id="start" class="card screen">
+      <div class="hero">
+        <div class="hero-boat">⛵</div>
+        <div>
+          <h2>Ahoy, kapitein!</h2>
+          <p>Vaar met je boot naar de haven door vragen goed te beantwoorden. Elke keer krijg je <b>andere vragen</b>. Vragen die je fout had komen vaker terug, zodat je ze écht leert.</p>
+        </div>
+      </div>
+
+      <button class="adventure-tile" data-go="adventure">
+        <span class="adv-emoji">🏝️</span>
+        <span><small>Begin hier!</small><b>Leer-avontuur</b>
+        <span>Vaar langs 6 eilanden en leer alles met spelletjes</span></span>
+        <span class="adv-arrow">▶</span>
+      </button>
+
+      <div class="menu-grid">
+        <button class="menu-tile" data-go="learnTopo">
+          <span class="emoji">🗺️</span>
+          <b>Topo leren</b>
+          <small>Bekijk de kaarten en leer de namen</small>
+        </button>
+        <button class="menu-tile" data-go="learnWords">
+          <span class="emoji">📖</span>
+          <b>Begrippen leren</b>
+          <small>Draai de kaartjes om</small>
+        </button>
+        <button class="menu-tile" data-go="topoOnly">
+          <span class="emoji">📍</span>
+          <b>Topo-oefenen</b>
+          <small>Alleen aanwijzen &amp; spellen</small>
+        </button>
+        <button class="menu-tile main" data-go="test">
+          <span class="emoji">🚢</span>
+          <b>Oefentoets</b>
+          <small>Alles door elkaar, met cijfer</small>
+        </button>
+      </div>
+
+      <div class="settings">
+        <div class="field">
+          <span class="label">Hoeveel vragen?</span>
+          <div class="choice-row" id="lengthChoice">
+            <button class="pill" data-n="10">10</button>
+            <button class="pill active" data-n="20">20</button>
+            <button class="pill" data-n="30">30</button>
+          </div>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="plusTopo" checked>
+          <span>Ook de <b>+ topo</b> (Dronten, Urk, Flevopolder, Noordoostpolder, Breskens, Neeltje Jans)</span>
+        </label>
+      </div>
+
+      <div id="historyBox" class="history"></div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="quiz" class="card screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" id="quitBtn">✕ stoppen</button>
+        <span id="qCounter">Vraag 1 van 20</span>
+        <span class="stats"><span id="qStreak" class="streak"></span><span id="qPoints">🪙 0</span></span>
+      </div>
+      <div class="voyage">
+        <div class="voyage-water"></div>
+        <div id="boat" class="voyage-boat"><span class="flip">🚢</span></div>
+        <div class="voyage-port">🏝️</div>
+      </div>
+
+      <span id="qTopic" class="tag">Topo</span>
+      <h2 id="qText" class="question"></h2>
+
+      <div id="qMap" class="map-box hidden"></div>
+      <div id="qOptions" class="options"></div>
+
+      <form id="qOpenForm" class="open hidden" autocomplete="off">
+        <input id="qInput" type="text" placeholder="Typ hier je antwoord…" spellcheck="false" autocapitalize="off" autocorrect="off">
+        <button class="btn" type="submit">Check ✔</button>
+      </form>
+
+      <div id="feedback" class="feedback hidden"></div>
+
+      <div class="actions">
+        <button class="btn ghost hidden" id="overrideBtn">Mijn antwoord klopt toch 👍</button>
+        <button class="btn hidden" id="nextBtn">Volgende ▶</button>
+      </div>
+    </section>
+
+    <!-- ===== RESULT ===== -->
+    <section id="result" class="card screen hidden">
+      <div class="result-top">
+        <div class="medal" id="medal">🏆</div>
+        <div>
+          <h2 id="resultTitle">Aangekomen in de haven!</h2>
+          <div class="stars" id="stars"></div>
+        </div>
+      </div>
+      <div class="grade">
+        <div class="grade-num" id="gradeNum">8,0</div>
+        <div>
+          <div id="gradeText" class="grade-text"></div>
+          <div id="gradeScore" class="muted"></div>
+        </div>
+      </div>
+      <div id="badges" class="badges"></div>
+      <div class="actions left">
+        <button class="btn" id="againBtn">Nog een keer ↻</button>
+        <button class="btn ghost" id="mistakesBtn">Oefen mijn fouten</button>
+        <button class="btn ghost" id="homeBtn">Naar het begin</button>
+      </div>
+      <h3>Nakijken</h3>
+      <ol id="review" class="review"></ol>
+    </section>
+
+    <!-- ===== AVONTUUR ===== -->
+    <section id="adventure" class="card screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" data-home>← terug</button>
+        <span>🏝️ Leer-avontuur</span>
+        <span></span>
+      </div>
+      <p class="muted small">Speel de eilanden één voor één. Haal je 3 sterren? ⭐⭐⭐</p>
+      <div id="islands" class="islands"></div>
+    </section>
+
+    <section id="station" class="card screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" id="stationBack">← eilanden</button>
+        <span id="stationTitle"></span>
+        <span></span>
+      </div>
+      <div id="stationDots" class="station-dots"></div>
+      <div id="stationBody" class="station-body"></div>
+      <div class="actions">
+        <button class="btn hidden" id="stationNext">Verder ▶</button>
+      </div>
+    </section>
+
+    <!-- ===== LEARN TOPO ===== -->
+    <section id="learnTopo" class="card screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" data-home>← terug</button>
+        <span>🗺️ Topo leren</span>
+        <span></span>
+      </div>
+      <div class="choice-row" id="mapTabs">
+        <button class="pill active" data-map="flevo">Flevoland</button>
+        <button class="pill" data-map="zeeland">Zeeland</button>
+      </div>
+      <p class="muted small">Tik op een stip om de naam te zien. Zet de namen uit en test jezelf! <span class="legend"><i class="lg plaats"></i>plaats <i class="lg water"></i>water <i class="lg gebied"></i>gebied/polder <i class="lg dijk"></i>dijk</span></p>
+      <label class="check"><input type="checkbox" id="showNames" checked> <span>Namen laten zien</span></label>
+      <div id="learnMap" class="map-box"></div>
+      <div id="learnInfo" class="learn-info">Tik op een stip of een naam hieronder.</div>
+      <div id="learnList" class="name-list"></div>
+    </section>
+
+    <!-- ===== LEARN WORDS ===== -->
+    <section id="learnWords" class="card screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" data-home>← terug</button>
+        <span>📖 Begrippen &amp; samenvatting</span>
+        <span></span>
+      </div>
+      <p class="muted small">Lees het woord, bedenk wat het betekent, en tik dan op het kaartje om het om te draaien.</p>
+      <div id="flashcards" class="flashcards"></div>
+      <h3>Samenvatting</h3>
+      <div id="summary" class="summary"></div>
+    </section>
+  </main>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+  <script src="adventure.js"></script>
+</body>
+</html>

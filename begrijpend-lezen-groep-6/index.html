@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1530">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Leesraket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <a class="home-link" href="../index.html">← Oliver Oefeneiland</a>
+        <h1>🚀 Leesraket</h1>
+        <p class="sub">Begrijpend lezen · groep 6</p>
+      </div>
+      <button class="icon-btn" id="soundBtn" title="Geluid aan/uit">🔊</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ===== HOME ===== -->
+    <section id="home" class="screen">
+      <div class="panel fuel-panel">
+        <div class="fuel-rocket" id="fuelRocket">🚀</div>
+        <div class="fuel-info">
+          <b>Brandstof: <span id="fuelNum">0</span> / <span id="fuelMax">48</span> ⭐</b>
+          <div class="fuel-bar"><span id="fuelBar"></span></div>
+          <small id="fuelText">Verdien sterren met lezen en vlieg naar de verste planeet!</small>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h2>Kies een missie</h2>
+        <button class="btn small" id="randomBtn">🎲 Verras me</button>
+      </div>
+      <div class="planets" id="planets"></div>
+
+      <h2>Trainingskamp</h2>
+      <p class="muted">Korte spelletjes om één leesvaardigheid te trainen.</p>
+      <div class="games" id="games"></div>
+
+      <h2>Jouw leesvaardigheden</h2>
+      <div class="panel skills" id="skills"></div>
+      <p class="reset-row"><button class="link-btn" id="resetBtn">Alle voortgang wissen</button></p>
+    </section>
+
+    <!-- ===== ONDERWERP ===== -->
+    <section id="topic" class="screen hidden">
+      <button class="link-btn" data-home>← terug naar de missies</button>
+      <h2 id="topicTitle"></h2>
+      <div class="text-cards" id="textCards"></div>
+    </section>
+
+    <!-- ===== LEZEN ===== -->
+    <section id="read" class="screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" id="readBack">← terug</button>
+        <span id="readTopic" class="tag"></span>
+      </div>
+      <div class="tip-box">
+        <b>🧠 Leestip:</b> <span id="readTip"></span>
+      </div>
+      <article class="tablet" id="readText"></article>
+      <div class="actions">
+        <button class="btn" id="startQuizBtn">Klaar met lezen · start de missie 🚀</button>
+      </div>
+    </section>
+
+    <!-- ===== VRAGEN ===== -->
+    <section id="quiz" class="screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" id="quitBtn">✕ stoppen</button>
+        <span id="qCounter">Vraag 1 van 7</span>
+        <span id="qStreak" class="streak"></span>
+      </div>
+      <div class="launch"><div class="launch-track"></div><div id="qRocket" class="launch-rocket">🚀</div><div class="launch-goal" id="qGoal">🪐</div></div>
+
+      <div class="quiz-grid">
+        <div class="text-side">
+          <button class="btn ghost small text-toggle" id="textToggle">📖 Tekst tonen</button>
+          <article class="tablet compact" id="quizText"></article>
+        </div>
+        <div class="panel q-side">
+          <span id="qSkill" class="tag"></span>
+          <h3 id="qText" class="question"></h3>
+          <div id="qBody"></div>
+          <div id="feedback" class="feedback hidden"></div>
+          <div class="actions"><button class="btn hidden" id="nextBtn">Volgende ▶</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RESULTAAT ===== -->
+    <section id="result" class="screen hidden">
+      <div class="panel result">
+        <div class="result-emoji" id="resEmoji">🪐</div>
+        <h2 id="resTitle">Missie geslaagd!</h2>
+        <div class="big-stars" id="resStars"></div>
+        <p id="resText"></p>
+        <div id="resSkills" class="res-skills"></div>
+        <div class="actions center">
+          <button class="btn" id="resNext">Volgende missie ▶</button>
+          <button class="btn ghost" id="resAgain">Nog een keer</button>
+          <button class="btn ghost" data-home>Naar de missies</button>
+        </div>
+        <h3>Nakijken</h3>
+        <ol class="review" id="resReview"></ol>
+      </div>
+    </section>
+
+    <!-- ===== MINI-SPEL ===== -->
+    <section id="game" class="screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" data-home>← terug</button>
+        <span id="gameTitle"></span>
+        <span id="gameCount" class="tag"></span>
+      </div>
+      <div class="panel" id="gameBody"></div>
+    </section>
+  </main>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script src="teksten.js"></script>
+  <script src="spel.js"></script>
+</body>
+</html>

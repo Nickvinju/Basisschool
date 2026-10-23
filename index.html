@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e7cc2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Oliver Oefeneiland</title>
+  <style>
+    :root {
+      --sea: #0e7cc2;
+      --sea-dark: #0a4f80;
+      --sea-light: #d9f0ff;
+      --sand: #fff6dc;
+      --sand-dark: #f1dfa8;
+      --green: #2fb36b;
+      --text: #17324d;
+      --muted: #5d7186;
+      --card: #ffffff;
+      --shadow: 0 8px 24px rgba(10, 79, 128, .15);
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; font-size: 18px;
+      background: linear-gradient(180deg, #bfe6ff 0%, #e8f6ff 50%, var(--sand) 100%);
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding-inline: 16px; padding-block: 0 60px; }
+
+    /* ---------- kop ---------- */
+    .hero { display: flex; align-items: center; gap: 18px; padding-block: 28px 18px; }
+    .hero-island { font-size: 4.5rem; line-height: 1; animation: bob 3s ease-in-out infinite; }
+    @keyframes bob { 50% { transform: translateY(-6px) rotate(-3deg); } }
+    .hero h1 { margin: 0; font-size: 2.2rem; color: var(--sea-dark); text-wrap: balance; }
+    .hero p { margin: 4px 0 0; color: var(--muted); }
+
+    .sea { position: fixed; left: 0; right: 0; bottom: 0; height: 70px; z-index: -1; opacity: .45;
+      background: repeating-linear-gradient(90deg, #7cc8f5 0 30px, #4aa9e6 30px 60px); animation: flow 8s linear infinite; }
+    @keyframes flow { to { background-position: 120px 0; } }
+
+    /* ---------- tegels ---------- */
+    .vak { margin: 22px 0 10px; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .tile {
+      display: flex; flex-direction: column; gap: 10px; min-width: 0;
+      background: var(--card); border-radius: 20px; padding: 18px; box-shadow: var(--shadow);
+      text-decoration: none; color: inherit; border-top: 8px solid var(--tile, var(--sea));
+      transition: transform .15s;
+    }
+    .tile:hover, .tile:focus-visible { transform: translateY(-4px) rotate(-.5deg); }
+    .tile:focus-visible { outline: 3px solid var(--tile, var(--sea)); outline-offset: 3px; }
+    .tile-head { display: flex; align-items: center; gap: 12px; }
+    .tile-emoji {
+      flex-shrink: 0; width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center;
+      font-size: 2rem; background: color-mix(in srgb, var(--tile, var(--sea)) 15%, white);
+    }
+    .tile h2 { margin: 0; font-size: 1.3rem; text-wrap: balance; }
+    .chip { display: inline-block; font-size: .78rem; font-weight: bold; color: var(--tile, var(--sea));
+      background: color-mix(in srgb, var(--tile, var(--sea)) 12%, white); border-radius: 999px; padding: 2px 10px; }
+    .tile p { margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.4; }
+    .stats { list-style: none; margin: 0; padding: 10px 12px; background: var(--sand); border-radius: 12px; font-size: .9rem; display: grid; gap: 3px; }
+    .bar { height: 10px; border-radius: 99px; background: #e3edf5; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: var(--green); border-radius: 99px; transition: width .6s; }
+    .play { margin-top: auto; align-self: flex-start; background: var(--tile, var(--sea)); color: #fff; font-weight: bold;
+      border-radius: 12px; padding: 10px 18px; box-shadow: 0 4px 0 rgba(0,0,0,.2); }
+
+    .tile.soon { border: 3px dashed var(--sand-dark); border-top-width: 3px; background: transparent; box-shadow: none; justify-content: center; text-align: center; color: var(--muted); }
+    .tile.soon .tile-emoji { margin: 0 auto; background: var(--sand); }
+
+    @media (max-width: 560px) {
+      body { font-size: 16px; }
+      .hero { padding-block: 18px 8px; }
+      .hero-island { font-size: 3.2rem; }
+      .hero h1 { font-size: 1.6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="sea" aria-hidden="true"></div>
+  <main class="wrap">
+    <header class="hero">
+      <div class="hero-island">🏝️</div>
+      <div>
+        <h1>Oliver Oefeneiland</h1>
+        <p id="greeting">Kies een eiland en ga oefenen!</p>
+      </div>
+    </header>
+
+    <div id="tiles"></div>
+  </main>
+
+  <script src="onderwerpen.js"></script>
+  <script>
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    const uur = new Date().getHours();
+    const groet = uur < 12 ? 'Goedemorgen' : uur < 18 ? 'Goedemiddag' : 'Goedenavond';
+    document.getElementById('greeting').textContent = `${groet} Oliver! Kies een eiland en ga oefenen. 🚀`;
+
+    function tegel(o) {
+      let v = null;
+      try { v = o.voortgang ? o.voortgang() : null; } catch { v = null; }
+      return `<a class="tile" href="${esc(o.link)}" style="--tile:${esc(o.kleur || '#0e7cc2')}">
+        <div class="tile-head">
+          <div class="tile-emoji">${o.emoji || '📘'}</div>
+          <div><h2>${esc(o.titel)}</h2><span class="chip">${esc(o.vak)}</span></div>
+        </div>
+        <p>${esc(o.uitleg || '')}</p>
+        ${v ? `<div class="bar" title="${v.procent}% klaar"><span style="width:${v.procent}%"></span></div>
+               <ul class="stats">${v.regels.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
+        <span class="play">${v && v.procent > 0 ? 'Verder spelen ▶' : 'Spelen ▶'}</span>
+      </a>`;
+    }
+
+    // Groepeer de tegels per vak, in de volgorde waarin ze in onderwerpen.js staan
+    const vakken = [...new Set(ONDERWERPEN.map(o => o.vak))];
+    document.getElementById('tiles').innerHTML = vakken.map(vak => `
+      <h3 class="vak">${esc(vak)}</h3>
+      <div class="tiles">
+        ${ONDERWERPEN.filter(o => o.vak === vak).map(tegel).join('')}
+      </div>`).join('') + `
+      <h3 class="vak">Binnenkort</h3>
+      <div class="tiles">
+        <div class="tile soon">
+          <div class="tile-emoji">🚧</div>
+          <h2>Nieuw eiland</h2>
+          <p>Hier komen straks meer onderwerpen bij.</p>
+        </div>
+      </div>`;
+  </script>
+</body>
+</html>
