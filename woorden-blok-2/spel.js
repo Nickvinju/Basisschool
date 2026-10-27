@@ -61,12 +61,23 @@ function zinHTML(w, vorm) {
   return esc(w.zin).replace(/\[([^\]]+)\]/g, (_, x) => vorm === 'gat' ? '<span class="gap">&nbsp;</span>' : `<b>${x}</b>`);
 }
 
+const kaal = s => s.replace(/^(de|het|een) /, '');
+
+// Alleen een gatenzin als het woord er letterlijk in past (dus niet bij 'voertuigen' of 'schiet … wakker')
+const zinPast = w => {
+  const stukken = w.zin.match(/\[[^\]]+\]/g);
+  return stukken.length === 1 && stukken[0] === `[${kaal(w.woord)}]`;
+};
+
 // Eén van de twee beschrijvingen: de betekenis of de voorbeeldzin met een gat
-function beschrijving(w, soort = pick(['betekenis', 'zin'])) {
+function beschrijving(w, soort = zinPast(w) ? pick(['betekenis', 'zin']) : 'betekenis') {
   return soort === 'betekenis'
     ? { soort, html: esc(w.betekenis), label: 'Betekenis' }
     : { soort, html: zinHTML(w, 'gat'), label: 'Zin' };
 }
+
+// Bij een gatenzin staat het lidwoord al in de zin, dus dan tonen we het woord zonder lidwoord
+const woordVorm = (x, b) => b.soort === 'zin' ? kaal(x.woord) : x.woord;
 
 const lijktOp = (a, b) => LIJKEN_OP.some(p => p.includes(a.woord) && p.includes(b.woord));
 
@@ -345,8 +356,8 @@ function woordVraag(w) {
     soort: b.soort,
     vraag: b.soort === 'betekenis' ? 'Welk woord hoort bij deze betekenis?' : 'Welk woord past in de zin?',
     clue: b.html, label: b.label,
-    opties: keuzesVoor(w).map(x => x.woord),
-    goed: w.woord,
+    opties: keuzesVoor(w).map(x => woordVorm(x, b)),
+    goed: woordVorm(w, b),
     uitleg: `${w.woord}: ${w.betekenis}`
   };
 }

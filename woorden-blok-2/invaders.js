@@ -83,19 +83,20 @@ function nieuweRonde() {
   // Overlap tussen twee woorden van links naar rechts (dan blokkeert het onderste woord je kogel)
   const overlap = (x, b) => geplaatst.reduce((s, p) => s + Math.max(0, Math.min(x + b, p.x + p.breed) - Math.max(x, p.x)), 0);
   inv.vallers = shuffle(keuzesVoor(w, L.woorden)).map((x, k) => {
+    const tekst = woordVorm(x, b);
     let grootte = 24;
     ctx.font = `800 ${grootte}px Nunito, sans-serif`;
-    while (ctx.measureText(x.woord).width + 28 > BREED - 20 && grootte > 14) {
+    while (ctx.measureText(tekst).width + 28 > BREED - 20 && grootte > 14) {
       grootte--; ctx.font = `800 ${grootte}px Nunito, sans-serif`;
     }
-    const breed = Math.min(BREED - 20, ctx.measureText(x.woord).width + 28);
+    const breed = Math.min(BREED - 20, ctx.measureText(tekst).width + 28);
     // Probeer een aantal plekken en kies de plek die het minst overlapt met de andere woorden
     let bestX = 10, bestO = Infinity;
     for (let p = 0; p < 30; p++) {
       const px = 10 + Math.random() * (BREED - 20 - breed), o = overlap(px, breed);
       if (o < bestO) { bestO = o; bestX = px; }
     }
-    const v = { w: x, goed: x === w, grootte, breed, hoog: grootte + 20, x: bestX, y: -60 - k * 95 };
+    const v = { w: x, tekst, goed: x === w, grootte, breed, hoog: grootte + 20, x: bestX, y: -60 - k * 95 };
     geplaatst.push(v);
     return v;
   });
@@ -260,7 +261,7 @@ function invUpdate(dt) {
       inv.score += 100 * (inv.level + 1);
       sndGood();
       knal(v.x + v.breed / 2, v.y + v.hoog / 2, '#4ee69a');
-      inv.melding = { tekst: `✅ ${v.w.woord}`, t: 1.1, goed: true };
+      inv.melding = { tekst: `✅ ${v.tekst}`, t: 1.1, goed: true };
       inv.vallers = [];
       inv.kogels = [];
       inv.pauze = .9;
@@ -269,7 +270,7 @@ function invUpdate(dt) {
     }
     v.weg = true;
     knal(v.x + v.breed / 2, v.y + v.hoog / 2, '#ff6b7a');
-    levenKwijt(`❌ ${v.w.woord} is niet goed`);
+    levenKwijt(`❌ ${v.tekst} is niet goed`);
     if (!inv.loopt) return;
   }
   inv.kogels = inv.kogels.filter(k => !k.weg && k.y > -20);
@@ -329,7 +330,7 @@ function invTeken() {
     ctx.fillStyle = '#fff';
     ctx.font = `800 ${v.grootte}px Nunito, sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(v.w.woord, v.x + v.breed / 2, v.y + v.hoog / 2 + 1);
+    ctx.fillText(v.tekst, v.x + v.breed / 2, v.y + v.hoog / 2 + 1);
   });
 
   // kogels
