@@ -81,7 +81,7 @@ const ONDERWERPEN = [
   {
     titel: 'Naut thema 6',
     vak: 'Natuur & techniek',
-    uitleg: 'Begrippen oefenen over sterke constructies: flitskaarten, koppelen, sorteren, een oefentoets, Woord-invaders en Meteorietenregen.',
+    uitleg: 'Begrippen oefenen over sterke constructies: flitskaarten, koppelen, een oefentoets, Woord-invaders en Meteorietenregen.',
     emoji: '🏗️',
     kleur: '#2b8a3e',
     link: 'naut-thema-6/index.html',

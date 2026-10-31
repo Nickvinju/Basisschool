@@ -39,18 +39,6 @@ WOORDEN.forEach((w, i) => { w.id = i; });
 /* Woorden die zo op elkaar lijken dat ze nooit samen als keuze verschijnen */
 const LIJKEN_OP = [];
 
-/* Sorteergroepen: een begrip met de dingen die erbij horen.
-   Groepen met hetzelfde 'paar' staan tegenover elkaar. */
-const CLUSTERS = [
-  { week: 1, paar: 'kracht', kop: 'de duwsterkte', leden: ['er duwt gewicht op', 'steen', 'de pilaar onder een brug'] },
-  { week: 1, paar: 'kracht', kop: 'de treksterkte', leden: ['je trekt eraan', 'touw', 'de kabel van een kraan'] },
-  { week: 2, paar: 'verbinding', kop: 'de vaste verbinding', leden: ['kan niet meer uit elkaar', 'een lasnaad', 'metselen'] },
-  { week: 2, paar: 'verbinding', kop: 'de beweegbare verbinding', leden: ['de delen kunnen nog bewegen', 'een paperclip', 'een scharnier'] },
-  { week: 3, paar: 'vorm', kop: 'de vierkantconstructie', leden: ['kan bewegen', 'een ophaalbrug'] },
-  { week: 3, paar: 'vorm', kop: 'de driehoeksconstructie', leden: ['vormvast en heel stevig', 'een hijskraan', 'het frame van een herenfiets'] },
-  { week: 3, paar: 'vorm', kop: 'de boogconstructie', leden: ['een koepeltent', 'bruggen en tunnels'] }
-];
-
 /* Samenvatting uit 'Leren voor de toets' (staat onder de begrippenlijst) */
 const SAMENVATTING = [
   { week: 1, tekst: 'De manier waarop iets is gebouwd, heet een <b>constructie</b>. De stevigheid hangt af van de materialen die je kiest. Elk materiaal heeft zijn eigen <b>materiaaleigenschappen</b>. Materialen die sterk zijn als er gewicht op duwt, hebben een hoge <b>duwsterkte</b>. Materialen die sterk zijn als je eraan trekt, hebben een hoge <b>treksterkte</b>.' },

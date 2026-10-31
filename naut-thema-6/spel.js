@@ -53,7 +53,6 @@ $('#soundBtn').textContent = data.geluid ? '🔊' : '🔇';
 
 /* ---------------- WOORD-HULPJES ---------------- */
 const selectie = () => WOORDEN.filter(w => !data.week || w.week === data.week);
-const clusterSel = () => CLUSTERS.filter(c => !data.week || c.week === data.week);
 
 // Zin met het woord vet ('vet') of met een gat ('gat')
 function zinHTML(w, vorm) {
@@ -114,8 +113,7 @@ function oefening(titel, teller = '', procent = 0) {
 const LEREN = [
   { id: 'lijst', emoji: '📋', naam: 'Begrippenlijst', uitleg: 'Bekijk alle begrippen met betekenis en zin, plus de samenvatting.', start: startLijst },
   { id: 'flits', emoji: '🃏', naam: 'Flitskaarten', uitleg: 'Weet jij wat het begrip betekent? Draai de kaart om.', start: startFlits },
-  { id: 'koppel', emoji: '🔗', naam: 'Koppelen', uitleg: 'Zoek bij elk begrip de goede betekenis.', start: startKoppel },
-  { id: 'clusters', emoji: '🧺', naam: 'Sorteren', uitleg: 'Wat hoort bij welk begrip? Sorteer de kaartjes.', start: startClusters }
+  { id: 'koppel', emoji: '🔗', naam: 'Koppelen', uitleg: 'Zoek bij elk begrip de goede betekenis.', start: startKoppel }
 ];
 
 function renderHome() {
@@ -125,7 +123,7 @@ function renderHome() {
   document.querySelectorAll('.chip').forEach(c => c.onclick = () => { data.week = +c.dataset.w; save(); renderHome(); });
   const sel = selectie();
   const bekend = sel.filter(w => data.bekend[w.id]).length;
-  $('#weekInfo').textContent = `${sel.length} begrippen · ${bekend} daarvan ken je al (flitskaarten) · ${clusterSel().length} sorteergroepen`;
+  $('#weekInfo').textContent = `${sel.length} begrippen · ${bekend} daarvan ken je al (flitskaarten)`;
 
   $('#leerTiles').innerHTML = LEREN.map(g => {
     const st = data.spellen[g.id];
@@ -140,7 +138,7 @@ function renderHome() {
   $('#speelTiles').innerHTML = `
     <button class="tile big" id="toetsTile">
       <span class="te">📝</span>
-      <span><b>Oefentoets</b><small>Meerkeuzevragen: kies het begrip bij de betekenis of de zin, plus vragen over wat bij elkaar hoort.</small>
+      <span><b>Oefentoets</b><small>Meerkeuzevragen: kies het begrip bij de betekenis of de zin.</small>
       <small>${beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')} · ${data.toetsen.length}× gemaakt` : 'Nog niet gemaakt'}</small></span>
     </button>
     <button class="tile big" id="invTile" style="--tc:#6c4bd8">
@@ -182,12 +180,6 @@ function toonUitslag({ emoji, titel, ster, cijfer, tekst, nakijken = '', opnieuw
 function bewaarSterren(id, st) { data.spellen[id] = Math.max(data.spellen[id] || 0, st); save(); }
 
 /* ================= 1. WOORDENLIJST ================= */
-function clusterHTML(cs) {
-  return `<div class="clusters">${cs.map(c => `
-    <div class="cluster"><span class="kop">${esc(c.kop)}</span>
-      <ul>${c.leden.map(l => `<li>${esc(l)}</li>`).join('')}</ul></div>`).join('')}</div>`;
-}
-
 function startLijst() {
   oefening('📋 Begrippenlijst');
   const weken = WEKEN.filter(wk => !data.week || wk.id === data.week);
@@ -200,10 +192,7 @@ function startLijst() {
         <p>${esc(w.betekenis)}</p>
         <p class="zin">${zinHTML(w, 'vet')}</p>
       </div>`).join('')}</div>
-    <div class="samenvatting"><b>Samenvatting</b><p>${SAMENVATTING.find(s => s.week === wk.id).tekst}</p></div>`).join('') + `
-    <h3 class="lijst-week">🧺 Wat hoort bij elkaar?</h3>
-    <p class="muted">Bij elk begrip staan dingen die erbij horen, zoals voorbeelden uit het boek.</p>
-    ${clusterHTML(clusterSel())}`;
+    <div class="samenvatting"><b>Samenvatting</b><p>${SAMENVATTING.find(s => s.week === wk.id).tekst}</p></div>`).join('');
   $('#oefBalk').style.width = '100%';
 }
 
@@ -290,72 +279,7 @@ function startKoppel() {
   speelRonde();
 }
 
-/* ================= 4. SORTEREN ================= */
-function startClusters() {
-  const weken = [...new Set(clusterSel().map(c => c.week))];
-  let r = 0, fouten = 0;
-
-  function ronde() {
-    if (r >= weken.length) {
-      const st = sterrenVoorFouten(fouten, [0, 2]);
-      bewaarSterren('clusters', st);
-      return toonUitslag({
-        emoji: '🧺', titel: 'Alles gesorteerd!', ster: st,
-        tekst: `Je maakte ${fouten} ${fouten === 1 ? 'fout' : 'fouten'}. Zo horen ze bij elkaar:`,
-        nakijken: clusterHTML(clusterSel()), opnieuw: startClusters
-      });
-    }
-    const cs = CLUSTERS.filter(c => c.week === weken[r]);
-    const kaarten = shuffle(cs.flatMap((c, ci) => c.leden.map(l => ({ l, ci }))));
-    oefening('🧺 Sorteren', `les ${weken[r]}`, Math.round(r / weken.length * 100));
-    $('#oefBody').innerHTML = `
-      <p class="muted">Tik op een kaartje en daarna op het begrip waar het bij hoort.</p>
-      <div class="sort-cards" id="kaarten">${kaarten.map((k, i) => `<button class="sort-card" data-i="${i}">${esc(k.l)}</button>`).join('')}</div>
-      <div class="bins">${cs.map((c, ci) => `<button class="bin" data-ci="${ci}"><span class="kop">${esc(c.kop)}</span><ul></ul></button>`).join('')}</div>
-      <div class="actions"><button class="btn hidden" id="clVolgende">Volgende ▶</button></div>`;
-    let gekozen = null, over = kaarten.length;
-    document.querySelectorAll('.sort-card').forEach(b => b.onclick = () => {
-      if (gekozen) gekozen.classList.remove('sel');
-      gekozen = b; b.classList.add('sel');
-    });
-    document.querySelectorAll('.bin').forEach(bin => bin.onclick = () => {
-      if (!gekozen) return;
-      const k = kaarten[+gekozen.dataset.i];
-      if (k.ci === +bin.dataset.ci) {
-        sndGood();
-        bin.querySelector('ul').insertAdjacentHTML('beforeend', `<li>${esc(k.l)}</li>`);
-        gekozen.remove(); gekozen = null;
-        if (--over === 0) { $('#clVolgende').classList.remove('hidden'); $('#clVolgende').focus(); }
-      } else {
-        sndBad(); fouten++;
-        const g = gekozen; g.classList.remove('sel'); g.classList.add('shake');
-        setTimeout(() => g.classList.remove('shake'), 400); gekozen = null;
-      }
-    });
-    $('#clVolgende').onclick = () => { r++; ronde(); };
-  }
-  ronde();
-}
-
 /* ================= OEFENTOETS ================= */
-function clusterVraag(c) {
-  const rij = [c.kop, ...c.leden];
-  const goed = pick(rij);
-  const anderen = CLUSTERS.filter(x => x !== c);
-  const tegenover = shuffle(anderen.filter(x => x.paar === c.paar).flatMap(x => [x.kop, ...x.leden]));
-  const rest = shuffle(anderen.filter(x => x.paar !== c.paar).flatMap(x => [x.kop, ...x.leden]));
-  const fout = [...new Set([...tegenover.slice(0, 2), ...rest])].filter(x => !rij.includes(x)).slice(0, 3);
-  return {
-    soort: 'cluster',
-    vraag: 'Wat hoort in dit rijtje?',
-    clue: rij.map(x => x === goed ? '<span class="gap">&nbsp;</span>' : `<b>${esc(x)}</b>`).join(' · '),
-    label: 'Hoort bij elkaar',
-    opties: shuffle([goed, ...fout]),
-    goed,
-    uitleg: `${rij.join(' · ')}`
-  };
-}
-
 function woordVraag(w, soort) {
   const b = beschrijving(w, soort);
   return {
@@ -369,14 +293,12 @@ function woordVraag(w, soort) {
 }
 
 function startToets() {
-  const cs = clusterSel();
-  const aantalCl = Math.min(3, cs.length);
   const sel = shuffle(selectie());
-  const wv = sel.slice(0, 15 - aantalCl).map(w => woordVraag(w));
+  const wv = sel.slice(0, 15).map(w => woordVraag(w));
   // Eén les heeft maar 4 of 5 begrippen: dan komt elk begrip ook met de andere beschrijving terug
-  const extra = sel.filter(zinPast).slice(0, 15 - aantalCl - wv.length)
+  const extra = sel.filter(zinPast).slice(0, 15 - wv.length)
     .map(w => woordVraag(w, wv[sel.indexOf(w)].soort === 'zin' ? 'betekenis' : 'zin'));
-  const vragen = shuffle([...wv, ...extra, ...shuffle(cs).slice(0, aantalCl).map(clusterVraag)]);
+  const vragen = shuffle([...wv, ...extra]);
   let i = 0;
   const antwoorden = [];
 
