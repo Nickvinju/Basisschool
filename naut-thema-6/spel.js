@@ -325,18 +325,21 @@ function toetsVragen(pool, n = 20) {
   return shuffle(vragen);
 }
 
-// oefenen = true: geen cijfer, en foute vragen komen aan het eind terug tot alles goed is
+// Foute vragen komen aan het eind terug tot je ze goed hebt. Het cijfer telt alleen je eerste antwoord.
+// oefenen = true: geen cijfer
 function startToets(oefenen = false, pool = selectie(), titel = oefenen ? '✏️ Oefenvragen' : '📝 Oefentoets') {
   const vragen = toetsVragen(pool, oefenen ? pool.length : 20);
+  const aantal = vragen.length; // zonder herkansingen
   let i = 0;
   const antwoorden = [];
 
   function vraag() {
     if (i >= vragen.length) return uitslag();
     const v = vragen[i];
-    oefening(titel, `vraag ${i + 1} van ${vragen.length}`, Math.round(i / vragen.length * 100));
+    oefening(titel, v.herkansing ? `🔁 nog ${vragen.length - i} te gaan` : `vraag ${i + 1} van ${aantal}`, Math.round(i / vragen.length * 100));
     $('#oefBody').innerHTML = `
       <div class="panel">
+        ${v.herkansing ? '<p class="muted">🔁 Deze had je fout. Probeer het nog een keer!</p>' : ''}
         <h3 class="question">${v.vraag}</h3>
         ${v.clue ? `<div class="clue"><span class="soort">${esc(v.label)}</span>${v.clue}</div>` : ''}
         <div class="opts">${v.opties.map((o, k) => `<button class="opt" data-o="${k}"><span class="key">${k + 1}</span>${esc(o)}</button>`).join('')}</div>
@@ -355,12 +358,12 @@ function startToets(oefenen = false, pool = selectie(), titel = oefenen ? '✏�
       data.fout[v.w.id] = ok ? Math.max(0, (data.fout[v.w.id] || 0) - 1) : (data.fout[v.w.id] || 0) + 1;
       save();
       if (ok) sndGood(); else sndBad();
-      // bij oefenen komt een foute vraag aan het eind nog een keer terug
-      if (!ok && oefenen) vragen.push(woordVraag(v.w, v.soort));
+      // een foute vraag komt aan het eind nog een keer terug (met de antwoorden in een andere volgorde)
+      if (!ok) vragen.push({ ...woordVraag(v.w, v.soort), herkansing: true });
       const fb = $('#toetsFeedback');
       fb.className = 'feedback ' + (ok ? 'good' : 'bad');
       // bij 'Wat betekent …?' staat de betekenis al in het antwoord, dan alleen de voorbeeldzin
-      fb.innerHTML = `${ok ? '✅ <b>Goed zo!</b>' : `❌ <b>Helaas.</b> Het goede antwoord is: <b>${esc(v.goed)}</b>`}<br>
+      fb.innerHTML = `${ok ? '✅ <b>Goed zo!</b>' : `❌ <b>Helaas.</b> Het goede antwoord is: <b>${esc(v.goed)}</b>. Deze vraag komt straks nog een keer terug.`}<br>
         ${v.soort === 'begrip' ? '' : `<b>${esc(v.w.woord)}</b>: ${esc(v.w.betekenis)}<br>`}<span class="muted">${zinHTML(v.w, 'vet')}</span>`;
       $('#toetsVolgende').classList.remove('hidden');
       $('#toetsVolgende').onclick = volgende;
@@ -387,17 +390,18 @@ function startToets(oefenen = false, pool = selectie(), titel = oefenen ? '✏�
         opnieuw: () => startToets(true, pool, titel)
       });
     }
-    const goed = antwoorden.filter(a => a.ok).length;
-    const cijfer = Math.round((1 + 9 * goed / vragen.length) * 10) / 10;
-    data.toetsen.push({ cijfer, week: data.week, goed, totaal: vragen.length, datum: Date.now() });
+    const eerste = antwoorden.filter(a => !a.v.herkansing);
+    const goed = eerste.filter(a => a.ok).length;
+    const cijfer = Math.round((1 + 9 * goed / aantal) * 10) / 10;
+    data.toetsen.push({ cijfer, week: data.week, goed, totaal: aantal, datum: Date.now() });
     save();
     toonUitslag({
       emoji: cijfer >= 8 ? '🏆' : cijfer >= 5.5 ? '👍' : '💪',
       titel: cijfer >= 8 ? 'Super gedaan!' : cijfer >= 5.5 ? 'Voldoende!' : 'Blijf oefenen!',
       cijfer,
-      tekst: `Je had <b>${goed}</b> van de ${vragen.length} vragen goed.`,
+      tekst: `Je had <b>${goed}</b> van de ${aantal} vragen meteen goed.${goed < aantal ? ' De foute vragen heb je daarna nog een keer goed gedaan.' : ''}`,
       nakijken: (foutWoorden.length ? `<div class="actions center"><button class="btn teal" id="foutenBtn">💪 Oefen mijn fouten (${foutWoorden.length})</button></div>` : '') +
-        `<h3>Nakijken</h3><ol class="review">${antwoorden.map(a => `
+        `<h3>Nakijken</h3><ol class="review">${eerste.map(a => `
           <li><span class="${a.ok ? 'ok' : 'nok'}">${a.ok ? '✔' : '✘'}</span> ${a.v.vraag}${a.v.clue ? `<br>${a.v.clue}` : ''}<br>
           ${a.ok ? '' : `Jij koos: <s>${esc(a.gekozen)}</s> · `}Goed: <b>${esc(a.v.goed)}</b></li>`).join('')}</ol>`,
       opnieuw: () => startToets()
