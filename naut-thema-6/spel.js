@@ -139,7 +139,7 @@ function renderHome() {
   $('#speelTiles').innerHTML = `
     <button class="tile big" id="toetsTile">
       <span class="te">📝</span>
-      <span><b>Oefentoets</b><small>15 meerkeuzevragen: wat betekent het begrip? Of andersom. Je ziet meteen of je antwoord goed is.</small>
+      <span><b>Oefentoets</b><small>20 meerkeuzevragen: wat betekent het begrip? Of andersom. Je ziet meteen of je antwoord goed is.</small>
       <small>${beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')} · ${data.toetsen.length}× gemaakt` : 'Nog niet gemaakt'}</small></span>
     </button>
     <button class="tile big" id="invTile" style="--tc:#6c4bd8">
@@ -304,19 +304,30 @@ const gewogen = pool => pool
   .map(w => ({ w, k: Math.random() ** (1 / (1 + 2 * (data.fout[w.id] || 0))) }))
   .sort((a, b) => b.k - a.k).map(x => x.w);
 
-function toetsVragen(pool, n = 15) {
-  const sel = gewogen(pool).slice(0, n);
-  const vragen = sel.map(w => woordVraag(w));
-  // Weinig begrippen (één les)? Dan komt elk begrip nog een keer terug, maar dan andersom gevraagd
-  sel.slice(0, n - vragen.length).forEach((w, k) => {
-    vragen.push(woordVraag(w, vragen[k].soort === 'begrip' ? (zinPast(w) ? pick(['betekenis', 'zin']) : 'betekenis') : 'begrip'));
-  });
+function toetsVragen(pool, n = 20) {
+  const sel = gewogen(pool);
+  const gehad = {}; // per begrip: welke soorten vragen er al waren
+  const vragen = [];
+  // Ga steeds het rijtje begrippen langs. Elke keer wordt een begrip op een andere manier gevraagd,
+  // zodat je ook bij één les (4 of 5 begrippen) op 20 vragen komt.
+  while (vragen.length < n) {
+    for (const w of sel) {
+      if (vragen.length >= n) break;
+      const alle = zinPast(w) ? ['begrip', 'betekenis', 'zin'] : ['begrip', 'betekenis'];
+      let open = alle.filter(x => !(gehad[w.id] || []).includes(x));
+      if (!open.length) { gehad[w.id] = []; open = alle; }
+      // net als bij Kapitein van de Polder vaak 'Wat betekent …?'
+      const soort = open.includes('begrip') && Math.random() < .5 ? 'begrip' : pick(open);
+      (gehad[w.id] = gehad[w.id] || []).push(soort);
+      vragen.push(woordVraag(w, soort));
+    }
+  }
   return shuffle(vragen);
 }
 
 // oefenen = true: geen cijfer, en foute vragen komen aan het eind terug tot alles goed is
 function startToets(oefenen = false, pool = selectie(), titel = oefenen ? '✏️ Oefenvragen' : '📝 Oefentoets') {
-  const vragen = toetsVragen(pool, oefenen ? pool.length : 15);
+  const vragen = toetsVragen(pool, oefenen ? pool.length : 20);
   let i = 0;
   const antwoorden = [];
 
