@@ -7,7 +7,7 @@
 
 const SPELLEN = {
   invaders: {
-    titel: '👾 Woord-invaders', opslag: 'inv', schip: 'schip', valler: 'alien', maat: 40, grond: 'maan',
+    titel: '👾 Woord-invaders', opslag: 'inv', schip: 'schip', valler: 'alien', maat: 40, letter: 24, grond: 'maan',
     kleur: ['#6c4bd8', '#b9a6ff'], confetti: ['👾', '⭐', '🚀', '✨'], alleenBetekenis: false,
     uitleg: `<p>Bovenaan staat een betekenis of een zin met een gat. De begrippen vallen naar beneden.
       Schiet op het <b>goede begrip</b> voordat het de grond raakt!</p>
@@ -15,7 +15,7 @@ const SPELLEN = {
     inslag: w => `Het goede begrip was: ${w}`
   },
   meteoor: {
-    titel: '☄️ Meteorietenregen', opslag: 'met', schip: 'kanon', valler: 'meteoor', maat: 56, grond: 'aarde',
+    titel: '☄️ Meteorietenregen', opslag: 'met', schip: 'kanon', valler: 'meteoor', maat: 34, letter: 19, zonderLidwoord: true, grond: 'aarde',
     kleur: ['#9c3a12', '#ffb36b'], confetti: ['☄️', '🌍', '⭐', '✨'], alleenBetekenis: true,
     uitleg: `<p>Meteorieten vliegen op de aarde af! Op elke meteoriet staat een begrip.
       Bovenaan zie je een betekenis. Schiet de meteoriet met het <b>goede begrip</b> kapot voordat hij inslaat!</p>
@@ -33,7 +33,6 @@ const LEVELS = [
 const LEVENS = 3;
 const BREED = 600; // logische breedte van het speelveld; de hoogte past zich aan het scherm aan
 const GROND = 44;  // hoogte van de maangrond onderin
-const ALIEN = 40;  // de alien die boven elk woord hangt
 
 // Pixel art gemaakt met PixelLab; zolang een plaatje nog laadt, tekent het spel simpele vormen
 const SPRITES = Object.fromEntries(['schip', 'alien', 'ruimte', 'maan', 'kanon', 'meteoor', 'aarde'].map(n => {
@@ -101,27 +100,43 @@ function nieuweRonde() {
   const b = beschrijving(w, spel.alleenBetekenis ? 'betekenis' : undefined);
   $('#invClue').innerHTML = b.soort === 'betekenis' ? `Betekenis:&nbsp;<b>${b.html}</b>` : b.html;
   const ctx = inv.ctx;
-  const geplaatst = [];
-  // Overlap tussen twee woorden van links naar rechts (dan blokkeert het onderste woord je kogel)
-  const overlap = (x, b) => geplaatst.reduce((s, p) => s + Math.max(0, Math.min(x + b, p.x + p.breed) - Math.max(x, p.x)), 0);
-  inv.vallers = shuffle(keuzesVoor(w, L.woorden)).map((x, k) => {
-    const tekst = woordVorm(x, b);
-    let grootte = 24;
+  // Grootste stuk van [x, x+br] waar geen lager woord voor hangt: daar kun je het woord altijd raken.
+  // (De woorden vallen in volgorde, dus alle eerder geplaatste woorden hangen lager.)
+  const vrij = (x, br, lager) => {
+    const bezet = lager.map(p => [Math.max(x, p.x), Math.min(x + br, p.x + p.breed)])
+      .filter(([a, c]) => c > a).sort((m, n) => m[0] - n[0]);
+    let best = 0, van = x;
+    for (const [a, c] of bezet) { best = Math.max(best, a - van); van = Math.max(van, c); }
+    return Math.max(best, x + br - van);
+  };
+  const woorden = shuffle(keuzesVoor(w, L.woorden)).map(x => {
+    const tekst = spel.zonderLidwoord ? kaal(x.woord) : woordVorm(x, b);
+    let grootte = spel.letter;
     ctx.font = `800 ${grootte}px Nunito, sans-serif`;
     while (ctx.measureText(tekst).width + 28 > BREED - 20 && grootte > 14) {
       grootte--; ctx.font = `800 ${grootte}px Nunito, sans-serif`;
     }
-    const breed = Math.min(BREED - 20, ctx.measureText(tekst).width + 28);
-    // Probeer een aantal plekken en kies de plek die het minst overlapt met de andere woorden
-    let bestX = 10, bestO = Infinity;
-    for (let p = 0; p < 30; p++) {
-      const px = 10 + Math.random() * (BREED - 20 - breed), o = overlap(px, breed);
-      if (o < bestO) { bestO = o; bestX = px; }
-    }
-    const v = { w: x, tekst, goed: x === w, grootte, breed, hoog: grootte + 20, x: bestX, y: -60 - k * 95 };
-    geplaatst.push(v);
-    return v;
+    return { w: x, tekst, goed: x === w, grootte, breed: Math.min(BREED - 20, ctx.measureText(tekst).width + 28), hoog: grootte + 20 };
   });
+  // Maak een paar indelingen en houd de indeling waarin het goede woord het grootste vrije stuk heeft,
+  // zodat je het kunt raken zonder eerst een fout woord te raken
+  const goedMin = Math.min(woorden.find(v => v.goed).breed, 110);
+  let beste = null, besteVrij = -1;
+  for (let poging = 0; poging < 400 && besteVrij < goedMin; poging++) {
+    const geplaatst = [];
+    let goedVrij = 0;
+    woorden.forEach((v, k) => {
+      let bestX = 10, bestV = -1;
+      for (let p = 0; p < 30; p++) {
+        const px = 10 + Math.random() * (BREED - 20 - v.breed), vr = vrij(px, v.breed, geplaatst);
+        if (vr > bestV) { bestV = vr; bestX = px; }
+      }
+      geplaatst.push({ ...v, x: bestX, y: -60 - k * 95 });
+      if (v.goed) goedVrij = bestV;
+    });
+    if (goedVrij > besteVrij) { besteVrij = goedVrij; beste = geplaatst; }
+  }
+  inv.vallers = beste;
   inv.pauze = 0;
 }
 
@@ -276,7 +291,7 @@ function invUpdate(dt) {
 
   // raak?
   for (const k of inv.kogels) {
-    const v = inv.vallers.find(v => !v.weg && k.x >= v.x && k.x <= v.x + v.breed && k.y <= v.y + v.hoog && k.y >= v.y - ALIEN + 6);
+    const v = inv.vallers.find(v => !v.weg && k.x >= v.x && k.x <= v.x + v.breed && k.y <= v.y + v.hoog && k.y >= v.y - spel.maat + 8);
     if (!v) continue;
     k.weg = true;
     if (v.goed) {
