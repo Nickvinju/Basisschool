@@ -10,7 +10,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 /* ---------------- OPSLAG ---------------- */
 const STORE = 'nautThema6_v1';
 function load() {
-  const leeg = { week: 0, bekend: {}, spellen: {}, toetsen: [], inv: { best: 0, level: 0 }, met: { best: 0, level: 0 }, geluid: true };
+  const leeg = { week: 0, bekend: {}, spellen: {}, toetsen: [], inv: { best: 0, level: 0 }, met: { best: 0, level: 0 }, fout: {}, geluid: true };
   try { return Object.assign(leeg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch { return leeg; }
 }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch { /* geen opslag */ } }
@@ -113,7 +113,8 @@ function oefening(titel, teller = '', procent = 0) {
 const LEREN = [
   { id: 'lijst', emoji: '📋', naam: 'Begrippenlijst', uitleg: 'Bekijk alle begrippen met betekenis en zin, plus de samenvatting.', start: startLijst },
   { id: 'flits', emoji: '🃏', naam: 'Flitskaarten', uitleg: 'Weet jij wat het begrip betekent? Draai de kaart om.', start: startFlits },
-  { id: 'koppel', emoji: '🔗', naam: 'Koppelen', uitleg: 'Zoek bij elk begrip de goede betekenis.', start: startKoppel }
+  { id: 'koppel', emoji: '🔗', naam: 'Koppelen', uitleg: 'Zoek bij elk begrip de goede betekenis.', start: startKoppel },
+  { id: 'oefenvragen', emoji: '✏️', naam: 'Oefenvragen', uitleg: 'Wat betekent het begrip? Foute vragen komen terug tot je ze goed hebt.', start: () => startToets(true) }
 ];
 
 function renderHome() {
@@ -138,7 +139,7 @@ function renderHome() {
   $('#speelTiles').innerHTML = `
     <button class="tile big" id="toetsTile">
       <span class="te">📝</span>
-      <span><b>Oefentoets</b><small>Meerkeuzevragen: kies het begrip bij de betekenis of de zin.</small>
+      <span><b>Oefentoets</b><small>15 meerkeuzevragen: wat betekent het begrip? Of andersom. Je ziet meteen of je antwoord goed is.</small>
       <small>${beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')} · ${data.toetsen.length}× gemaakt` : 'Nog niet gemaakt'}</small></span>
     </button>
     <button class="tile big" id="invTile" style="--tc:#6c4bd8">
@@ -151,7 +152,7 @@ function renderHome() {
       <span><b>Meteorietenregen</b><small>Bescherm de aarde! Lees de betekenis en schiet de meteoriet met het goede begrip kapot. 3 levels.</small>
       <small>${data.met.best ? `🏆 Highscore: ${data.met.best} · hoogste level: ${data.met.level}` : 'Nog niet gespeeld'}</small></span>
     </button>`;
-  $('#toetsTile').onclick = startToets;
+  $('#toetsTile').onclick = () => startToets();
   $('#invTile').onclick = () => startInvaders('invaders');
   $('#metTile').onclick = () => startInvaders('meteoor');
 }
@@ -280,73 +281,117 @@ function startKoppel() {
 }
 
 /* ================= OEFENTOETS ================= */
-function woordVraag(w, soort) {
+// Net als bij Kapitein van de Polder: meestal zie je het begrip en kies je de betekenis,
+// soms andersom (betekenis of zin → begrip). Na elke vraag zie je meteen of het goed was.
+function woordVraag(w, soort = pick(['begrip', 'begrip', 'betekenis', zinPast(w) ? 'zin' : 'betekenis'])) {
+  if (soort === 'begrip') {
+    return {
+      w, soort, vraag: `Wat betekent <b>${esc(w.woord)}</b>?`,
+      opties: keuzesVoor(w).map(x => x.betekenis), goed: w.betekenis
+    };
+  }
   const b = beschrijving(w, soort);
   return {
-    soort: b.soort,
+    w, soort: b.soort,
     vraag: b.soort === 'betekenis' ? 'Welk begrip hoort bij deze betekenis?' : 'Welk begrip past in de zin?',
     clue: b.html, label: b.label,
-    opties: keuzesVoor(w).map(x => woordVorm(x, b)),
-    goed: woordVorm(w, b),
-    uitleg: `${w.woord}: ${w.betekenis}`
+    opties: keuzesVoor(w).map(x => woordVorm(x, b)), goed: woordVorm(w, b)
   };
 }
 
-function startToets() {
-  const sel = shuffle(selectie());
-  const wv = sel.slice(0, 15).map(w => woordVraag(w));
-  // Eén les heeft maar 4 of 5 begrippen: dan komt elk begrip ook met de andere beschrijving terug
-  const extra = sel.filter(zinPast).slice(0, 15 - wv.length)
-    .map(w => woordVraag(w, wv[sel.indexOf(w)].soort === 'zin' ? 'betekenis' : 'zin'));
-  const vragen = shuffle([...wv, ...extra]);
+// Begrippen die je vaak fout had, komen eerder (en dus vaker) aan de beurt
+const gewogen = pool => pool
+  .map(w => ({ w, k: Math.random() ** (1 / (1 + 2 * (data.fout[w.id] || 0))) }))
+  .sort((a, b) => b.k - a.k).map(x => x.w);
+
+function toetsVragen(pool, n = 15) {
+  const sel = gewogen(pool).slice(0, n);
+  const vragen = sel.map(w => woordVraag(w));
+  // Weinig begrippen (één les)? Dan komt elk begrip nog een keer terug, maar dan andersom gevraagd
+  sel.slice(0, n - vragen.length).forEach((w, k) => {
+    vragen.push(woordVraag(w, vragen[k].soort === 'begrip' ? (zinPast(w) ? pick(['betekenis', 'zin']) : 'betekenis') : 'begrip'));
+  });
+  return shuffle(vragen);
+}
+
+// oefenen = true: geen cijfer, en foute vragen komen aan het eind terug tot alles goed is
+function startToets(oefenen = false, pool = selectie(), titel = oefenen ? '✏️ Oefenvragen' : '📝 Oefentoets') {
+  const vragen = toetsVragen(pool, oefenen ? pool.length : 15);
   let i = 0;
   const antwoorden = [];
 
   function vraag() {
     if (i >= vragen.length) return uitslag();
     const v = vragen[i];
-    oefening('📝 Oefentoets', `vraag ${i + 1} van ${vragen.length}`, Math.round(i / vragen.length * 100));
+    oefening(titel, `vraag ${i + 1} van ${vragen.length}`, Math.round(i / vragen.length * 100));
     $('#oefBody').innerHTML = `
       <div class="panel">
-        <h3 class="question">${esc(v.vraag)}</h3>
-        <div class="clue"><span class="soort">${esc(v.label)}</span>${v.clue}</div>
+        <h3 class="question">${v.vraag}</h3>
+        ${v.clue ? `<div class="clue"><span class="soort">${esc(v.label)}</span>${v.clue}</div>` : ''}
         <div class="opts">${v.opties.map((o, k) => `<button class="opt" data-o="${k}"><span class="key">${k + 1}</span>${esc(o)}</button>`).join('')}</div>
+        <div id="toetsFeedback" class="feedback hidden"></div>
+        <div class="actions"><button class="btn hidden" id="toetsVolgende">Volgende ▶</button></div>
       </div>`;
     const knoppen = [...document.querySelectorAll('.opt')];
+    const volgende = () => { i++; vraag(); };
     const kies = k => {
       if (knoppen[0].disabled) return;
       knoppen.forEach(b => b.disabled = true);
-      knoppen[k].classList.add('sel');
-      knoppen[k].style.borderColor = 'var(--teal)';
-      antwoorden.push({ v, gekozen: v.opties[k] });
-      sndFlip();
-      setTimeout(() => { i++; vraag(); }, 450);
+      const ok = v.opties[k] === v.goed;
+      knoppen[k].classList.add(ok ? 'good' : 'bad');
+      knoppen[v.opties.indexOf(v.goed)].classList.add('good');
+      antwoorden.push({ v, gekozen: v.opties[k], ok });
+      data.fout[v.w.id] = ok ? Math.max(0, (data.fout[v.w.id] || 0) - 1) : (data.fout[v.w.id] || 0) + 1;
+      save();
+      if (ok) sndGood(); else sndBad();
+      // bij oefenen komt een foute vraag aan het eind nog een keer terug
+      if (!ok && oefenen) vragen.push(woordVraag(v.w, v.soort));
+      const fb = $('#toetsFeedback');
+      fb.className = 'feedback ' + (ok ? 'good' : 'bad');
+      // bij 'Wat betekent …?' staat de betekenis al in het antwoord, dan alleen de voorbeeldzin
+      fb.innerHTML = `${ok ? '✅ <b>Goed zo!</b>' : `❌ <b>Helaas.</b> Het goede antwoord is: <b>${esc(v.goed)}</b>`}<br>
+        ${v.soort === 'begrip' ? '' : `<b>${esc(v.w.woord)}</b>: ${esc(v.w.betekenis)}<br>`}<span class="muted">${zinHTML(v.w, 'vet')}</span>`;
+      $('#toetsVolgende').classList.remove('hidden');
+      $('#toetsVolgende').onclick = volgende;
+      $('#toetsVolgende').focus();
     };
     knoppen.forEach((b, k) => b.onclick = () => kies(k));
     stopToetsen();
-    toetsKeys = e => { const n = +e.key; if (n >= 1 && n <= knoppen.length) kies(n - 1); };
+    toetsKeys = e => {
+      const n = +e.key;
+      if (n >= 1 && n <= knoppen.length) kies(n - 1);
+      else if (e.key === 'Enter' && knoppen[0].disabled && document.activeElement !== $('#toetsVolgende')) volgende();
+    };
     addEventListener('keydown', toetsKeys);
   }
 
   function uitslag() {
     stopToetsen();
-    const goed = antwoorden.filter(a => a.gekozen === a.v.goed).length;
+    const foutWoorden = [...new Set(antwoorden.filter(a => !a.ok).map(a => a.v.w))];
+    if (oefenen) {
+      bewaarSterren('oefenvragen', foutWoorden.length === 0 ? 3 : foutWoorden.length <= 2 ? 2 : 1);
+      return toonUitslag({
+        emoji: '✏️', titel: 'Alles een keer goed gehad!', ster: data.spellen.oefenvragen,
+        tekst: foutWoorden.length ? `Deze begrippen vond je nog lastig: <b>${foutWoorden.map(w => esc(w.woord)).join(', ')}</b>.` : 'Je had alles meteen goed!',
+        opnieuw: () => startToets(true, pool, titel)
+      });
+    }
+    const goed = antwoorden.filter(a => a.ok).length;
     const cijfer = Math.round((1 + 9 * goed / vragen.length) * 10) / 10;
     data.toetsen.push({ cijfer, week: data.week, goed, totaal: vragen.length, datum: Date.now() });
     save();
-    const fout = antwoorden.filter(a => a.gekozen !== a.v.goed);
     toonUitslag({
       emoji: cijfer >= 8 ? '🏆' : cijfer >= 5.5 ? '👍' : '💪',
       titel: cijfer >= 8 ? 'Super gedaan!' : cijfer >= 5.5 ? 'Voldoende!' : 'Blijf oefenen!',
       cijfer,
       tekst: `Je had <b>${goed}</b> van de ${vragen.length} vragen goed.`,
-      nakijken: `<h3>Nakijken</h3><ol class="review">${antwoorden.map(a => {
-        const ok = a.gekozen === a.v.goed;
-        return `<li><span class="${ok ? 'ok' : 'nok'}">${ok ? '✔' : '✘'}</span> ${a.v.clue}<br>
-          ${ok ? '' : `Jij koos: <s>${esc(a.gekozen)}</s> · `}Goed: <b>${esc(a.v.goed)}</b></li>`;
-      }).join('')}</ol>${fout.length ? '<p class="muted">Tip: oefen de foute begrippen nog eens met de flitskaarten.</p>' : ''}`,
-      opnieuw: startToets
+      nakijken: (foutWoorden.length ? `<div class="actions center"><button class="btn teal" id="foutenBtn">💪 Oefen mijn fouten (${foutWoorden.length})</button></div>` : '') +
+        `<h3>Nakijken</h3><ol class="review">${antwoorden.map(a => `
+          <li><span class="${a.ok ? 'ok' : 'nok'}">${a.ok ? '✔' : '✘'}</span> ${a.v.vraag}${a.v.clue ? `<br>${a.v.clue}` : ''}<br>
+          ${a.ok ? '' : `Jij koos: <s>${esc(a.gekozen)}</s> · `}Goed: <b>${esc(a.v.goed)}</b></li>`).join('')}</ol>`,
+      opnieuw: () => startToets()
     });
+    if (foutWoorden.length) $('#foutenBtn').onclick = () => startToets(true, foutWoorden, '💪 Fouten oefenen');
   }
   vraag();
 }
