@@ -1,0 +1,221 @@
+/* Naut thema 6 – 'schrift'-look in Naut-groen; de invaders spelen in een donker ruimtevak.
+   De hoofdkleur heet nog --orange (zelfde code als Woorden blok 2), maar is hier groen. */
+:root {
+  --paper: #f3faf3;
+  --paper-2: #dff2e1;
+  --card: #ffffff;
+  --line: #c6e3c9;
+  --text: #1d2a1f;
+  --muted: #5c6d5e;
+  --orange: #2b8a3e;
+  --orange-dark: #1e6630;
+  --teal: #1864ab;
+  --teal-light: #dbe9f8;
+  --yellow: #ffd23f;
+  --good: #1f9d55;
+  --good-bg: #dcf5e6;
+  --bad: #d93a4a;
+  --bad-bg: #fde2e5;
+  --space: #10142e;
+  --shadow: 0 6px 18px rgba(20, 80, 30, .12);
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; font-family: var(--body); font-size: 18px; color: var(--text);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 33px, rgba(11, 122, 117, .07) 33px 34px),
+    var(--paper);
+}
+button, input, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
+main.wrap { padding-block: 4px 60px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; }
+h2 { font-size: 1.6rem; margin: 26px 0 10px; }
+
+/* ---------- kop ---------- */
+.top { padding-block: 14px 4px; }
+.top-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.top h1 { margin: 0; font-size: 2rem; color: var(--orange-dark); }
+.sub { margin: 0; color: var(--muted); }
+.home-link { color: var(--teal); text-decoration: none; font-weight: 800; font-size: .9rem; }
+.home-link:hover { text-decoration: underline; }
+.icon-btn { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--line); background: var(--card); font-size: 1.3rem; cursor: pointer; }
+
+/* ---------- bouwstenen ---------- */
+.panel { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); }
+.btn {
+  font: inherit; font-weight: 800; border: none; border-radius: 14px; padding: 12px 20px; cursor: pointer;
+  background: var(--orange); color: #fff; box-shadow: 0 4px 0 var(--orange-dark);
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--orange-dark); }
+.btn.ghost { background: transparent; color: var(--orange-dark); border: 2px solid var(--orange); box-shadow: none; }
+.btn.teal { background: var(--teal); box-shadow: 0 4px 0 #075551; }
+.btn.small { padding: 8px 14px; font-size: .95rem; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn:focus-visible, .link-btn:focus-visible, .opt:focus-visible, .tile:focus-visible, .chip:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.link-btn { background: none; border: none; color: var(--muted); font: inherit; cursor: pointer; padding: 4px 0; }
+.tag { display: inline-block; background: var(--teal-light); color: var(--teal); border-radius: 999px; padding: 3px 12px; font-size: .85rem; font-weight: 800; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+.actions.center { justify-content: center; }
+.reset-row { text-align: center; margin-top: 30px; }
+.reset-row .link-btn { font-size: .85rem; text-decoration: underline; }
+
+/* ---------- home ---------- */
+.week-panel { display: grid; gap: 10px; margin-top: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit; font-weight: 800; cursor: pointer; border-radius: 999px; padding: 8px 16px;
+  border: 2px solid var(--line); background: var(--paper); color: var(--text);
+}
+.chip[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.tile {
+  font: inherit; color: inherit; text-align: left; cursor: pointer; min-width: 0;
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 14px;
+  box-shadow: var(--shadow); transition: transform .15s, border-color .15s;
+}
+.tile:hover { transform: translateY(-3px) rotate(-.4deg); border-color: var(--tc, var(--orange)); }
+.tile .te { flex-shrink: 0; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 1.7rem;
+  background: color-mix(in srgb, var(--tc, var(--orange)) 15%, white); }
+.tile b { display: block; font-family: var(--display); font-size: 1.15rem; }
+.tile small { display: block; color: var(--muted); line-height: 1.35; margin-top: 2px; }
+.tile .ts { display: inline-block; margin-top: 6px; color: var(--orange); font-weight: 800; letter-spacing: 2px; }
+.tile.big { grid-column: span 2; }
+@media (max-width: 560px) { .tile.big { grid-column: auto; } }
+
+/* ---------- oefenscherm ---------- */
+.quiz-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.oef-titel { font-family: var(--display); font-weight: 800; font-size: 1.2rem; text-align: center; }
+.progress { height: 10px; border-radius: 99px; background: var(--paper-2); overflow: hidden; margin: 10px 0 16px; }
+.progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--yellow), var(--orange)); transition: width .4s; }
+
+.question { font-family: var(--display); font-size: 1.45rem; margin: 6px 0 16px; line-height: 1.3; }
+.clue { background: var(--paper-2); border-radius: 14px; padding: 14px 16px; font-size: 1.2rem; line-height: 1.45; margin-bottom: 16px; }
+.clue .soort { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.gap { display: inline-block; min-width: 70px; border-bottom: 3px solid var(--orange); }
+.zin b, .clue b { color: var(--orange-dark); }
+
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px) { .opts { grid-template-columns: 1fr; } }
+.opt {
+  font: inherit; font-weight: 800; text-align: left; cursor: pointer; color: var(--text);
+  background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px;
+  display: flex; gap: 10px; align-items: center; min-height: 58px;
+}
+.opt:hover:not(:disabled) { border-color: var(--orange); }
+.opt .key { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; background: var(--paper-2); display: grid; place-items: center; font-size: .85rem; }
+.opt.good { background: var(--good-bg); border-color: var(--good); }
+.opt.bad { background: var(--bad-bg); border-color: var(--bad); }
+.opt:disabled { cursor: default; }
+
+.feedback { margin-top: 14px; padding: 12px 16px; border-radius: 14px; line-height: 1.45; }
+.feedback.good { background: var(--good-bg); }
+.feedback.bad { background: var(--bad-bg); }
+
+/* ---------- woordenlijst ---------- */
+.lijst { display: grid; gap: 10px; }
+.lijst-item { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.lijst-item h3 { margin: 0; font-size: 1.25rem; color: var(--teal); }
+.lijst-item .soort { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.lijst-item p { margin: 4px 0 0; line-height: 1.4; }
+.lijst-item .zin { color: var(--muted); font-style: italic; }
+.lijst-week { margin: 22px 0 8px; color: var(--orange-dark); }
+
+.clusters { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.cluster { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 12px; text-align: center; }
+.cluster .kop { display: inline-block; background: var(--teal); color: #fff; border-radius: 12px; padding: 6px 12px; font-weight: 800; }
+.cluster ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.cluster li { background: var(--teal-light); border-radius: 10px; padding: 6px 8px; position: relative; }
+.cluster li::before { content: ''; position: absolute; left: 50%; top: -7px; height: 7px; border-left: 2px solid var(--teal); }
+
+/* ---------- flitskaarten ---------- */
+.flip { perspective: 1200px; cursor: pointer; margin: 0 auto; max-width: 560px; }
+.flip-inner { position: relative; min-height: 260px; transition: transform .5s; transform-style: preserve-3d; }
+.flip.open .flip-inner { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--card); border: 3px solid var(--line); border-radius: 22px; padding: 22px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; box-shadow: var(--shadow);
+}
+.flip-face.back { transform: rotateY(180deg); background: var(--teal-light); border-color: var(--teal); }
+.flip-word { font-family: var(--display); font-size: 2.2rem; color: var(--orange-dark); line-height: 1.1; }
+.flip-hint { color: var(--muted); font-size: .9rem; }
+.flip-mean { font-size: 1.3rem; font-weight: 800; }
+
+/* ---------- koppelen ---------- */
+.match { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; }
+.match-col { display: grid; gap: 10px; align-content: start; }
+.match .opt { min-height: 64px; }
+.match .opt.sel { border-color: var(--teal); background: var(--teal-light); }
+.match .opt.done { visibility: hidden; }
+.match .opt.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (max-width: 560px) { .match { grid-template-columns: 1fr 1.3fr; } .match .opt { font-size: .9rem; padding: 10px; } }
+
+/* ---------- clusters sorteren ---------- */
+.sort-cards { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 50px; }
+.sort-card { font: inherit; font-weight: 800; cursor: pointer; border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 14px; color: var(--text); }
+.sort-card.sel { border-color: var(--orange); background: var(--paper-2); transform: translateY(-3px); }
+.sort-card.shake { animation: shake .35s; border-color: var(--bad); }
+.bins { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.bin { font: inherit; text-align: left; cursor: pointer; background: var(--teal-light); border: 3px dashed var(--teal); border-radius: 16px; padding: 12px; min-height: 120px; color: var(--text); }
+.bin .kop { display: inline-block; background: var(--teal); color: #fff; border-radius: 10px; padding: 4px 10px; font-weight: 800; }
+.bin ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+.bin li { background: var(--card); border-radius: 10px; padding: 6px 10px; font-weight: 700; }
+
+/* ---------- uitslag ---------- */
+.result { text-align: center; margin-top: 16px; }
+.result-emoji { font-size: 4rem; }
+.result h2 { margin: 6px 0; }
+.big-stars { font-size: 2.6rem; color: var(--yellow); letter-spacing: 6px; text-shadow: 0 2px 0 var(--orange-dark); }
+.cijfer { font-family: var(--display); font-size: 3.4rem; color: var(--orange-dark); line-height: 1; }
+.review { text-align: left; display: grid; gap: 8px; padding-left: 22px; margin-top: 10px; }
+.review li { line-height: 1.4; }
+.review .ok { color: var(--good); font-weight: 800; }
+.review .nok { color: var(--bad); font-weight: 800; }
+
+/* ---------- woord-invaders ---------- */
+.inv-hud { display: flex; justify-content: space-between; gap: 10px; font-weight: 800; font-size: 1.1rem; margin: 10px 0 8px; }
+.inv-clue {
+  background: var(--space); color: #fff; border-radius: 14px 14px 0 0; padding: 12px 16px; min-height: 64px;
+  font-size: 1.15rem; line-height: 1.35; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 700;
+}
+.inv-clue b { color: var(--yellow); }
+.inv-stage { position: relative; background: var(--space); border-radius: 0 0 14px 14px; overflow: hidden; }
+#invCanvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+.inv-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  text-align: center; color: #fff; background: rgba(16, 20, 46, .82); padding: 20px;
+}
+.inv-overlay:empty { display: none; }
+.inv-overlay h2 { margin: 0; font-size: 2rem; color: var(--yellow); }
+.inv-overlay p { margin: 0; max-width: 420px; line-height: 1.45; }
+.inv-pad { display: none; gap: 10px; margin-top: 10px; }
+.pad-btn { flex: 1; font: inherit; font-weight: 800; font-size: 1.3rem; padding: 14px; border-radius: 14px; border: none; background: var(--teal); color: #fff; box-shadow: 0 4px 0 #075551; }
+.pad-btn.fire { flex: 2; background: var(--orange); box-shadow: 0 4px 0 var(--orange-dark); }
+.inv-help { font-size: .85rem; text-align: center; }
+@media (pointer: coarse) { .inv-pad { display: flex; } }
+
+/* ---------- confetti ---------- */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+.confetti span { position: absolute; top: -40px; font-size: 1.8rem; animation: fall 2.4s ease-in forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .top h1 { font-size: 1.6rem; }
+  .question { font-size: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* samenvatting onder elke les in de begrippenlijst */
+.samenvatting { background: var(--paper-2); border-radius: 14px; padding: 12px 16px; margin: 12px 0 4px; }
+.samenvatting p { margin: 6px 0 0; line-height: 1.5; }

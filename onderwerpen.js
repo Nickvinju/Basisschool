@@ -77,6 +77,29 @@ const ONDERWERPEN = [
         procent: Math.round((bekend / totaal) * 100)
       };
     }
+  },
+  {
+    titel: 'Naut thema 6',
+    vak: 'Natuur & techniek',
+    uitleg: 'Begrippen oefenen over sterke constructies: flitskaarten, koppelen, sorteren, een oefentoets en Woord-invaders.',
+    emoji: '🏗️',
+    kleur: '#2b8a3e',
+    link: 'naut-thema-6/index.html',
+    voortgang() {
+      const d = leesOpslag('nautThema6_v1');
+      if (!d) return null;
+      const totaal = 13; // aantal begrippen in naut-thema-6/woorden.js
+      const bekend = Object.values(d.bekend || {}).filter(Boolean).length;
+      const beste = (d.toetsen || []).reduce((m, t) => Math.max(m, t.cijfer), 0);
+      return {
+        regels: [
+          `🃏 ${bekend} / ${totaal} begrippen gekend`,
+          beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')}` : '🏆 Nog geen oefentoets gemaakt',
+          `👾 Highscore Woord-invaders: ${(d.inv && d.inv.best) || 0}`
+        ],
+        procent: Math.round((bekend / totaal) * 100)
+      };
+    }
   }
 
   // Voorbeeld voor later (haal de // weg en vul in):

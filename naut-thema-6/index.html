@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2b8a3e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Naut thema 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <a class="home-link" href="../index.html">← Oliver Oefeneiland</a>
+        <h1>🏗️ Naut thema 6</h1>
+        <p class="sub">Natuur &amp; techniek · begrippen oefenen · sterke constructies</p>
+      </div>
+      <button class="icon-btn" id="soundBtn" title="Geluid aan/uit">🔊</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ===== HOME ===== -->
+    <section id="home" class="screen">
+      <div class="panel week-panel">
+        <b>Welke begrippen wil je oefenen?</b>
+        <div class="chips" id="weekChips"></div>
+        <small class="muted" id="weekInfo"></small>
+      </div>
+
+      <h2>📚 Leren</h2>
+      <div class="tiles" id="leerTiles"></div>
+
+      <h2>🏆 Toets &amp; spel</h2>
+      <div class="tiles" id="speelTiles"></div>
+
+      <p class="reset-row"><button class="link-btn" id="resetBtn">Alle voortgang wissen</button></p>
+    </section>
+
+    <!-- ===== OEFENING (lijst, flitskaarten, koppelen, sorteren, toets) ===== -->
+    <section id="oefening" class="screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" data-home>← terug</button>
+        <span id="oefTitel" class="oef-titel"></span>
+        <span id="oefTeller" class="tag"></span>
+      </div>
+      <div class="progress"><span id="oefBalk"></span></div>
+      <div id="oefBody"></div>
+    </section>
+
+    <!-- ===== UITSLAG ===== -->
+    <section id="uitslag" class="screen hidden">
+      <div class="panel result">
+        <div class="result-emoji" id="resEmoji">🎉</div>
+        <h2 id="resTitel"></h2>
+        <div class="big-stars" id="resSterren"></div>
+        <p id="resTekst"></p>
+        <div class="actions center">
+          <button class="btn" id="resOpnieuw">Nog een keer</button>
+          <button class="btn ghost" data-home>Naar het overzicht</button>
+        </div>
+        <div id="resNakijken"></div>
+      </div>
+    </section>
+
+    <!-- ===== WOORD-INVADERS ===== -->
+    <section id="invaders" class="screen hidden">
+      <div class="quiz-head">
+        <button class="link-btn" id="invStop">← stoppen</button>
+        <span class="oef-titel">👾 Woord-invaders</span>
+        <span id="invLevel" class="tag">Level 1</span>
+      </div>
+      <div class="inv-hud">
+        <span id="invScore">⭐ 0</span>
+        <span id="invHits"></span>
+        <span id="invLevens">❤️❤️❤️</span>
+      </div>
+      <div class="inv-clue" id="invClue">Schiet op het begrip dat hierbij hoort!</div>
+      <div class="inv-stage" id="invStage">
+        <canvas id="invCanvas"></canvas>
+        <div class="inv-overlay" id="invOverlay"></div>
+      </div>
+      <div class="inv-pad" aria-hidden="true">
+        <button class="pad-btn" id="padLeft">◀</button>
+        <button class="pad-btn fire" id="padFire">🔥 Schiet</button>
+        <button class="pad-btn" id="padRight">▶</button>
+      </div>
+      <p class="muted inv-help">Pijltjes ← → om te bewegen, spatie om te schieten. Op een tablet: tik waar je wilt schieten.</p>
+    </section>
+  </main>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script src="woorden.js"></script>
+  <script src="spel.js"></script>
+  <script src="invaders.js"></script>
+</body>
+</html>
