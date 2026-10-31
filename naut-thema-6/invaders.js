@@ -1,7 +1,29 @@
 /* =========================================================
-   Woord-invaders (Naut thema 6) – schiet op het woord dat bij de beschrijving hoort
+   Woord-invaders en Meteorietenregen (Naut thema 6)
+   Schiet op het begrip dat bij de beschrijving hoort.
+   Beide spellen gebruiken dezelfde code, alleen het thema verschilt.
    (gebruikt de hulpjes uit spel.js)
    ========================================================= */
+
+const SPELLEN = {
+  invaders: {
+    titel: '👾 Woord-invaders', opslag: 'inv', schip: 'schip', valler: 'alien', maat: 40, grond: 'maan',
+    kleur: ['#6c4bd8', '#b9a6ff'], confetti: ['👾', '⭐', '🚀', '✨'], alleenBetekenis: false,
+    uitleg: `<p>Bovenaan staat een betekenis of een zin met een gat. De begrippen vallen naar beneden.
+      Schiet op het <b>goede begrip</b> voordat het de grond raakt!</p>
+      <p>✅ Goed begrip = punten · ❌ Fout begrip of goed begrip op de grond = een leven kwijt</p>`,
+    inslag: w => `Het goede begrip was: ${w}`
+  },
+  meteoor: {
+    titel: '☄️ Meteorietenregen', opslag: 'met', schip: 'kanon', valler: 'meteoor', maat: 56, grond: 'aarde',
+    kleur: ['#9c3a12', '#ffb36b'], confetti: ['☄️', '🌍', '⭐', '✨'], alleenBetekenis: true,
+    uitleg: `<p>Meteorieten vliegen op de aarde af! Op elke meteoriet staat een begrip.
+      Bovenaan zie je een betekenis. Schiet de meteoriet met het <b>goede begrip</b> kapot voordat hij inslaat!</p>
+      <p>✅ Goed begrip = punten · ❌ Fout begrip of inslag op aarde = een leven kwijt</p>`,
+    inslag: w => `💥 Inslag! Het was: ${w}`
+  }
+};
+let spel = SPELLEN.invaders;
 
 const LEVELS = [
   { woorden: 3, snelheid: 30, nodig: 6 },
@@ -14,7 +36,7 @@ const GROND = 44;  // hoogte van de maangrond onderin
 const ALIEN = 40;  // de alien die boven elk woord hangt
 
 // Pixel art gemaakt met PixelLab; zolang een plaatje nog laadt, tekent het spel simpele vormen
-const SPRITES = Object.fromEntries(['schip', 'alien', 'ruimte', 'maan'].map(n => {
+const SPRITES = Object.fromEntries(['schip', 'alien', 'ruimte', 'maan', 'kanon', 'meteoor', 'aarde'].map(n => {
   const img = new Image(); img.src = `img/${n}.png`; return [n, img];
 }));
 const klaar = img => img.complete && img.naturalWidth > 0;
@@ -42,17 +64,17 @@ function invMaat() {
 addEventListener('resize', () => { if (!$('#invaders').classList.contains('hidden')) invMaat(); });
 
 /* ---------------- spelverloop ---------------- */
-function startInvaders() {
+function startInvaders(soort = 'invaders') {
+  spel = SPELLEN[soort];
+  inv.soort = soort;
   show('invaders');
+  $('#invTitel').textContent = spel.titel;
   invMaat();
   inv.level = 0; inv.score = 0;
   inv.zak = [];
   invHud();
   $('#invClue').innerHTML = 'Schiet op het begrip dat bij de beschrijving hoort!';
-  overlay(`<h2>👾 Woord-invaders</h2>
-    <p>Bovenaan staat een betekenis of een zin met een gat. De begrippen vallen naar beneden.
-    Schiet op het <b>goede begrip</b> voordat het de grond raakt!</p>
-    <p>✅ Goed begrip = punten · ❌ Fout begrip of goed begrip op de grond = een leven kwijt</p>
+  overlay(`<h2>${spel.titel}</h2>${spel.uitleg}
     <button class="btn" id="invGo">Start level 1 ▶</button>`);
   $('#invGo').onclick = () => startLevel(0);
 }
@@ -76,7 +98,7 @@ function nieuweRonde() {
   const L = LEVELS[inv.level];
   const w = volgendDoel();
   inv.doel = w;
-  const b = beschrijving(w);
+  const b = beschrijving(w, spel.alleenBetekenis ? 'betekenis' : undefined);
   $('#invClue').innerHTML = b.soort === 'betekenis' ? `Betekenis:&nbsp;<b>${b.html}</b>` : b.html;
   const ctx = inv.ctx;
   const geplaatst = [];
@@ -120,21 +142,22 @@ function stopInvaders() {
 }
 
 function bewaarInvaders(levelGehaald) {
-  data.inv.best = Math.max(data.inv.best || 0, inv.score);
-  data.inv.level = Math.max(data.inv.level || 0, levelGehaald);
+  const d = data[spel.opslag] = data[spel.opslag] || { best: 0, level: 0 };
+  d.best = Math.max(d.best || 0, inv.score);
+  d.level = Math.max(d.level || 0, levelGehaald);
   save();
 }
 
 function levelKlaar() {
   stopInvaders();
-  sndWin(); confetti(['👾', '⭐', '🚀', '✨']);
+  sndWin(); confetti(spel.confetti);
   if (inv.level === LEVELS.length - 1) {
     bewaarInvaders(LEVELS.length);
     overlay(`<h2>🏆 Gewonnen!</h2>
       <p>Je hebt alle ${LEVELS.length} levels gehaald met <b>${inv.score}</b> punten.</p>
-      <p>Highscore: ${data.inv.best}</p>
+      <p>Highscore: ${data[spel.opslag].best}</p>
       <button class="btn" id="invOpnieuw">Nog een keer</button>`);
-    $('#invOpnieuw').onclick = startInvaders;
+    $('#invOpnieuw').onclick = () => startInvaders(inv.soort);
   } else {
     bewaarInvaders(inv.level + 1);
     overlay(`<h2>Level ${inv.level + 1} gehaald! 🎉</h2>
@@ -150,9 +173,9 @@ function gameOver() {
   overlay(`<h2>Game over 💥</h2>
     <p>Je kwam tot level ${inv.level + 1} met <b>${inv.score}</b> punten.</p>
     <p>Het laatste begrip was: <b>${esc(inv.doel.woord)}</b> – ${esc(inv.doel.betekenis)}</p>
-    <p>Highscore: ${data.inv.best}</p>
+    <p>Highscore: ${data[spel.opslag].best}</p>
     <button class="btn" id="invOpnieuw">Opnieuw proberen</button>`);
-  $('#invOpnieuw').onclick = startInvaders;
+  $('#invOpnieuw').onclick = () => startInvaders(inv.soort);
 }
 
 function levenKwijt(tekst) {
@@ -280,7 +303,7 @@ function invUpdate(dt) {
     if (v.y + v.hoog < grond) continue;
     v.weg = true;
     if (v.goed) {
-      levenKwijt(`Het goede begrip was: ${v.w.woord}`);
+      levenKwijt(spel.inslag(v.w.woord));
       if (!inv.loopt) return;
       inv.vallers = [];
       inv.pauze = 1.2;
@@ -313,8 +336,13 @@ function invTeken() {
   ctx.globalAlpha = 1;
 
   // grond
-  if (klaar(SPRITES.maan)) {
-    const img = SPRITES.maan, h = GROND + 6, w = img.width * h / img.height;
+  const grondImg = SPRITES[spel.grond];
+  if (spel.grond === 'aarde' && klaar(grondImg)) {
+    // de aarde is één brede strook met een ronde horizon
+    const h = GROND + 26;
+    ctx.drawImage(grondImg, 0, H - h, BREED, h);
+  } else if (klaar(grondImg)) {
+    const img = grondImg, h = GROND + 6, w = img.width * h / img.height;
     for (let x = 0; x < BREED; x += w) ctx.drawImage(img, x, H - h, w, h);
   } else {
     ctx.fillStyle = '#2a3270';
@@ -323,10 +351,11 @@ function invTeken() {
 
   // vallende woorden, elk gedragen door een alien
   inv.vallers.forEach(v => {
-    if (klaar(SPRITES.alien)) ctx.drawImage(SPRITES.alien, v.x + v.breed / 2 - ALIEN / 2, v.y - ALIEN + 6, ALIEN, ALIEN);
-    ctx.fillStyle = '#6c4bd8';
+    const drager = SPRITES[spel.valler];
+    if (klaar(drager)) ctx.drawImage(drager, v.x + v.breed / 2 - spel.maat / 2, v.y - spel.maat + 8, spel.maat, spel.maat);
+    ctx.fillStyle = spel.kleur[0];
     rondRect(ctx, v.x, v.y, v.breed, v.hoog, 12); ctx.fill();
-    ctx.strokeStyle = '#b9a6ff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = spel.kleur[1]; ctx.lineWidth = 2; ctx.stroke();
     ctx.fillStyle = '#fff';
     ctx.font = `800 ${v.grootte}px Nunito, sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -339,8 +368,8 @@ function invTeken() {
 
   // schip
   const s = inv.schip, y = H - GROND;
-  if (klaar(SPRITES.schip)) {
-    ctx.drawImage(SPRITES.schip, s.x - 32, y - 60, 64, 64);
+  if (klaar(SPRITES[spel.schip])) {
+    ctx.drawImage(SPRITES[spel.schip], s.x - 32, y - 60, 64, 64);
   } else {
     ctx.fillStyle = '#3ddcff';
     ctx.beginPath(); ctx.moveTo(s.x, y - 40); ctx.lineTo(s.x + 22, y - 6); ctx.lineTo(s.x - 22, y - 6); ctx.closePath(); ctx.fill();

@@ -81,7 +81,7 @@ const ONDERWERPEN = [
   {
     titel: 'Naut thema 6',
     vak: 'Natuur & techniek',
-    uitleg: 'Begrippen oefenen over sterke constructies: flitskaarten, koppelen, sorteren, een oefentoets en Woord-invaders.',
+    uitleg: 'Begrippen oefenen over sterke constructies: flitskaarten, koppelen, sorteren, een oefentoets, Woord-invaders en Meteorietenregen.',
     emoji: '🏗️',
     kleur: '#2b8a3e',
     link: 'naut-thema-6/index.html',
@@ -95,7 +95,7 @@ const ONDERWERPEN = [
         regels: [
           `🃏 ${bekend} / ${totaal} begrippen gekend`,
           beste ? `🏆 Beste cijfer: ${beste.toFixed(1).replace('.', ',')}` : '🏆 Nog geen oefentoets gemaakt',
-          `👾 Highscore Woord-invaders: ${(d.inv && d.inv.best) || 0}`
+          `👾 Highscore invaders: ${(d.inv && d.inv.best) || 0} · ☄️ meteorieten: ${(d.met && d.met.best) || 0}`
         ],
         procent: Math.round((bekend / totaal) * 100)
       };

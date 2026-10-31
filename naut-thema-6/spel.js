@@ -10,7 +10,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 /* ---------------- OPSLAG ---------------- */
 const STORE = 'nautThema6_v1';
 function load() {
-  const leeg = { week: 0, bekend: {}, spellen: {}, toetsen: [], inv: { best: 0, level: 0 }, geluid: true };
+  const leeg = { week: 0, bekend: {}, spellen: {}, toetsen: [], inv: { best: 0, level: 0 }, met: { best: 0, level: 0 }, geluid: true };
   try { return Object.assign(leeg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch { return leeg; }
 }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch { /* geen opslag */ } }
@@ -147,9 +147,15 @@ function renderHome() {
       <span class="te">👾</span>
       <span><b>Woord-invaders</b><small>De begrippen vallen naar beneden. Schiet op het begrip dat bij de beschrijving hoort! 3 levels.</small>
       <small>${data.inv.best ? `🏆 Highscore: ${data.inv.best} · hoogste level: ${data.inv.level}` : 'Nog niet gespeeld'}</small></span>
+    </button>
+    <button class="tile big" id="metTile" style="--tc:#c2410c">
+      <span class="te">☄️</span>
+      <span><b>Meteorietenregen</b><small>Bescherm de aarde! Lees de betekenis en schiet de meteoriet met het goede begrip kapot. 3 levels.</small>
+      <small>${data.met.best ? `🏆 Highscore: ${data.met.best} · hoogste level: ${data.met.level}` : 'Nog niet gespeeld'}</small></span>
     </button>`;
   $('#toetsTile').onclick = startToets;
-  $('#invTile').onclick = () => startInvaders();
+  $('#invTile').onclick = () => startInvaders('invaders');
+  $('#metTile').onclick = () => startInvaders('meteoor');
 }
 
 $('#resetBtn').onclick = () => {
