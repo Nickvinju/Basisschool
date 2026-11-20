@@ -181,7 +181,9 @@ table.data th { background: #eef3f8; }
 .flagbig { font-size: 5rem; line-height: 1; }
 
 .klok-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.klok-wrap svg { width: min(260px, 70vw); height: auto; touch-action: none; }
+.visual svg.klok { width: min(150px, 40vw); height: auto; }
+.klok-wrap svg.klok { width: min(190px, 52vw); height: auto; touch-action: none; }
+.feedback .visual svg.klok { width: min(110px, 30vw); }
 .digital { font-family: "Courier New", monospace; font-weight: 800; font-size: 2.2rem; background: #17324d; color: #7cf5b5; border-radius: 12px; padding: 6px 18px; letter-spacing: 3px; }
 .klok-hint { font-size: .9rem; color: var(--muted); text-align: center; }
 

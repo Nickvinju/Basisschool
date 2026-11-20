@@ -40,7 +40,7 @@ const KLOK = (() => {
 
   function svg(h, m, id) {
     const c = 110, r = 100;
-    let s = `<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" ${id ? `id="${id}"` : ''} role="img" aria-label="klok">`;
+    let s = `<svg class="klok" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" ${id ? `id="${id}"` : ''} role="img" aria-label="klok">`;
     s += `<circle cx="${c}" cy="${c}" r="${r}" fill="#fffdf6" stroke="#17324d" stroke-width="6"/>`;
     for (let i = 0; i < 60; i++) {
       const a = i * 6 * Math.PI / 180, big = i % 5 === 0;
