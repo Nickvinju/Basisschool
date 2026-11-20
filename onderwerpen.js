@@ -9,6 +9,28 @@
 
 const ONDERWERPEN = [
   {
+    titel: 'Wereldreis groep 6',
+    vak: 'Groep 6 oefenen (Leerling in beeld)',
+    uitleg: 'Begrijpend lezen, spelling, rekenen en klokkijken, met dezelfde soort vragen als in de toets. Verdien vlag-stempels voor je paspoort!',
+    emoji: '🌍',
+    kleur: '#1f6fb2',
+    link: 'wereldreis-groep-6/index.html',
+    voortgang() {
+      const d = leesOpslag('wereldreis6_v1');
+      if (!d) return null;
+      const totaal = 48;
+      const vragen = Object.entries(d.stats || {}).filter(([k]) => !k.startsWith('tekst:')).reduce((a, [, s]) => a + (s.t || 0), 0);
+      return {
+        regels: [
+          `🛂 ${(d.stempels || []).length} / ${totaal} vlag-stempels`,
+          `✏️ ${vragen} vragen geoefend`,
+          `🔁 ${(d.historie || []).length}× een ronde gespeeld`
+        ],
+        procent: Math.round(((d.stempels || []).length / totaal) * 100)
+      };
+    }
+  },
+  {
     titel: 'Kapitein van de Polder',
     vak: 'Aardrijkskunde',
     uitleg: 'Meander thema 6: Pas op voor de zee, Nieuw land en de topo van Flevoland en Zeeland.',
@@ -98,28 +120,6 @@ const ONDERWERPEN = [
           `👾 Highscore invaders: ${(d.inv && d.inv.best) || 0} · ☄️ meteorieten: ${(d.met && d.met.best) || 0}`
         ],
         procent: Math.round((bekend / totaal) * 100)
-      };
-    }
-  },
-  {
-    titel: 'Wereldreis groep 6',
-    vak: 'Groep 6 oefenen (Leerling in beeld)',
-    uitleg: 'Begrijpend lezen, spelling, rekenen en klokkijken, met dezelfde soort vragen als in de toets. Verdien vlag-stempels voor je paspoort!',
-    emoji: '🌍',
-    kleur: '#1f6fb2',
-    link: 'wereldreis-groep-6/index.html',
-    voortgang() {
-      const d = leesOpslag('wereldreis6_v1');
-      if (!d) return null;
-      const totaal = 48;
-      const vragen = Object.entries(d.stats || {}).filter(([k]) => !k.startsWith('tekst:')).reduce((a, [, s]) => a + (s.t || 0), 0);
-      return {
-        regels: [
-          `🛂 ${(d.stempels || []).length} / ${totaal} vlag-stempels`,
-          `✏️ ${vragen} vragen geoefend`,
-          `🔁 ${(d.historie || []).length}× een ronde gespeeld`
-        ],
-        procent: Math.round(((d.stempels || []).length / totaal) * 100)
       };
     }
   }
